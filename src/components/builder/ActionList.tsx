@@ -33,14 +33,12 @@ function SortableActionCard({
   isEntryAction,
   onEdit,
   onDelete,
-  onUpdate,
   isOver,
 }: {
   action: Action;
   isEntryAction: boolean;
   onEdit: (action: Action) => void;
   onDelete: (actionId: string) => void;
-  onUpdate: (actionId: string, updates: Partial<Action>) => void;
   isOver?: boolean;
 }) {
   const {
@@ -69,7 +67,6 @@ function SortableActionCard({
         isEntryAction={isEntryAction}
         onEdit={() => onEdit(action)}
         onDelete={() => onDelete(action.id)}
-        onUpdate={(updates) => onUpdate(action.id, updates)}
         dragHandleProps={{ ...attributes, ...listeners }}
       />
     </div>
@@ -80,7 +77,7 @@ export function ActionList({
   actions,
   onEdit,
   onDelete,
-  onUpdate,
+  onUpdate: _onUpdate,
 }: ActionListProps) {
   const { reorderActions } = useJourney();
   const [activeId, setActiveId] = React.useState<string | null>(null);
@@ -142,7 +139,6 @@ export function ActionList({
                   isEntryAction={index === 0}
                   onEdit={onEdit}
                   onDelete={onDelete}
-                  onUpdate={onUpdate}
                   isOver={overId === action.id && activeId !== action.id}
                 />
               </div>
