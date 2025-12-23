@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* EGYM Design System - Extracted from Figma */
+    
+    /* Colors - From Figma Variables */
+    --background: 0 0% 100%; /* #ffffff - White */
+    --foreground: 0 0% 0%; /* #000000 - Black (Product/Light/Primary) */
+    
+    --card: 0 0% 100%; /* #ffffff */
+    --card-foreground: 0 0% 0%; /* #000000 */
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    
+    /* Primary: EGYM Orange (Main Focus) */
+    --primary: 20 100% 39%; /* #C75300 - EGYM brand orange */
+    --primary-foreground: 0 0% 100%; /* White text on orange */
+    
+    /* Secondary: Light gray for sidebar/inactive states */
+    --secondary: 0 0% 93%; /* #ededed - Surface/default-pressed */
+    --secondary-foreground: 0 0% 0%; /* Black text */
+    
+    /* Muted: Very light gray for subtle backgrounds */
+    --muted: 0 0% 95%; /* Slightly lighter than secondary */
+    --muted-foreground: 0 0% 55%; /* #8d8d8d - Content/hinted */
+    
+    /* Accent: For hover states */
+    --accent: 0 0% 98%; /* Very light gray for hover */
+    --accent-foreground: 0 0% 0%;
+    
+    /* Destructive: Red for errors/delete */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders: Very subtle, light gray */
+    --border: 0 0% 95%; /* #f2f2f2 - Border/hinted */
+    --input: 0 0% 95%; /* #f2f2f2 */
+    --ring: 20 100% 39%; /* Orange focus ring */
+    
+    /* Radius: From Figma */
+    --radius: 0.5rem; /* 8px - Radius/card */
+    --radius-sm: 0.25rem; /* 4px - Radius/text_area */
+  }
+
+  .dark {
+    /* Dark mode - keeping for future */
+    --background: 0 0% 10%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 20 100% 39%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 20 100% 39%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    /* Helvetica Now Display - EGYM brand font */
+    font-family: "Helvetica Now Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+/* Custom utilities for EGYM-specific patterns */
+@layer utilities {
+  /* Sidebar active state - light gray background */
+  .sidebar-active {
+    @apply bg-secondary text-foreground;
+  }
+  
+  /* Table row hover - very subtle */
+  .table-row-hover:hover {
+    @apply bg-muted/50;
+  }
+  
+  /* Clean minimal shadow for cards - matching Figma */
+  .card-shadow {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  }
+  
+  /* Typography scale from Figma */
+  .text-body-100 {
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.3px;
+    font-weight: 400;
+  }
+  
+  .text-body-100-medium {
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.3px;
+    font-weight: 500;
+  }
+  
+  .text-body-50-bold {
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.3px;
+    font-weight: 700;
+  }
+  
+  .text-marginal-25-medium {
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+  
+  .text-marginal-25-regular {
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.5px;
+    font-weight: 400;
+  }
+  
+  /* Dotted grid background for Zapier-style canvas */
+  .dotted-canvas {
+    background-image: 
+      radial-gradient(circle, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: 0 0;
+  }
+}

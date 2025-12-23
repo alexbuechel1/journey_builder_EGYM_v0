@@ -1,0 +1,199 @@
+import { useState } from 'react';
+import { useJourney } from '@/contexts/JourneyContext';
+import { JourneySelector } from './JourneySelector';
+import { ActionList } from './ActionList';
+import { ActionForm } from './ActionForm';
+import { Button } from '@/components/ui/button';
+import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import { ToastContainer, useToast } from '@/components/ui/toast';
+import { X, Zap, Plus } from 'lucide-react';
+import type { Action } from '@/lib/types';
+import { getActionLibraryItem } from '@/lib/actionLibrary';
+
+export function JourneyBuilder() {
+  const { currentJourney, addAction, updateAction, deleteAction } = useJourney();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingAction, setEditingAction] = useState<Action | undefined>();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [actionToDelete, setActionToDelete] = useState<{ id: string; title: string } | null>(null);
+  const { toasts, showToast, dismissToast } = useToast();
+
+  const handleAddAction = () => {
+    setEditingAction(undefined);
+    setIsFormOpen(true);
+  };
+
+  const handleEditAction = (action: Action) => {
+    setEditingAction(action);
+    setIsFormOpen(true);
+  };
+
+  const handleSaveAction = async (actionData: Omit<Action, 'id'>) => {
+    try {
+      if (editingAction) {
+        await updateAction(editingAction.id, actionData);
+        showToast('Action updated successfully', 'success');
+      } else {
+        await addAction(actionData);
+        showToast('Action added successfully', 'success');
+      }
+      setIsFormOpen(false);
+      setEditingAction(undefined);
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : 'Failed to save action',
+        'error'
+      );
+    }
+  };
+
+  const handleDeleteClick = (actionId: string) => {
+    const action = currentJourney?.actions.find((a) => a.id === actionId);
+    if (action) {
+      const libraryItem = getActionLibraryItem(action.actionTypeId);
+      const title = libraryItem?.title || action.actionTypeId;
+      setActionToDelete({ id: actionId, title });
+      setDeleteDialogOpen(true);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (actionToDelete) {
+      try {
+        await deleteAction(actionToDelete.id);
+        showToast('Action deleted successfully', 'success');
+        setActionToDelete(null);
+      } catch (error) {
+        showToast(
+          error instanceof Error ? error.message : 'Failed to delete action',
+          'error'
+        );
+      }
+    }
+  };
+
+  const handleUpdateAction = async (actionId: string, updates: Partial<Action>) => {
+    await updateAction(actionId, updates);
+  };
+
+  const { error, setError } = useJourney();
+
+  if (!currentJourney) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-body-100 text-muted-foreground">No journey selected</p>
+      </div>
+    );
+  }
+
+  const previousActionExists = currentJourney.actions.length > 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Error Display */}
+      {error && (
+        <div
+          className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-lg flex items-center justify-between"
+          role="alert"
+          aria-live="assertive"
+        >
+          <span className="text-body-100">{error}</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={() => setError(null)}
+            aria-label="Dismiss error"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        </div>
+      )}
+
+      {/* Journey Selector */}
+      <JourneySelector />
+
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-body-100-medium font-medium text-foreground">Define the customer experience for your gym</h2>
+        </div>
+      </div>
+
+      {/* Action List - Always with dotted canvas background */}
+      <div className={`relative dotted-canvas bg-muted/30 rounded-lg -mx-6 px-6 py-6 pb-20 ${currentJourney.actions.length === 0 ? 'min-h-[calc(100vh-300px)]' : 'min-h-[calc(100vh-400px)]'}`}>
+        {currentJourney.actions.length === 0 ? (
+          /* Empty state - centered card */
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="bg-[#f5f5f0] border-2 border-dashed border-primary rounded-lg p-6 shadow-lg min-w-[320px]">
+              {/* Action button inside card - top left */}
+              <button
+                onClick={handleAddAction}
+                className="flex items-center gap-2 bg-[#2d2d2d] text-white border border-white/20 rounded-md px-3 py-1.5 text-sm font-medium hover:bg-[#3d3d3d] transition-colors mb-4"
+                aria-label="Add new action"
+              >
+                <Zap className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Action</span>
+              </button>
+              
+              {/* Step number text */}
+              <p className="text-body-100 font-medium text-foreground">
+                <span className="font-semibold">1.</span> Add your first action to get started
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Action list on dotted canvas */}
+            <ActionList
+              actions={currentJourney.actions}
+              onEdit={handleEditAction}
+              onDelete={handleDeleteClick}
+              onUpdate={handleUpdateAction}
+            />
+            
+            {/* Floating Add Action Button - Zapier style */}
+            <div className="relative flex flex-col items-center">
+              {/* Connection line from last action */}
+              <div className="w-0.5 h-10 bg-primary"></div>
+              
+              {/* Floating plus button */}
+              <button
+                onClick={handleAddAction}
+                className="relative z-10 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label="Add new action"
+              >
+                <Plus className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Action Form Dialog */}
+      <ActionForm
+        open={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditingAction(undefined);
+        }}
+        onSave={handleSaveAction}
+        existingAction={editingAction}
+        isEntryAction={currentJourney.actions.length === 0}
+        previousActionExists={previousActionExists}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        actionTitle={actionToDelete?.title}
+      />
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+    </div>
+  );
+}
+
