@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { Action, Product, Reminder, TimeRange } from '@/lib/types';
-import { getAllActionLibraryItems, getActionLibraryItem, getActionsByCategory, type ActionCategory } from '@/lib/actionLibrary';
-import { getProductInfo, PRODUCT_INFO, type ProductInfo } from '@/lib/productMapping';
+import { getActionLibraryItem, getActionsByCategory, type ActionCategory } from '@/lib/actionLibrary';
+import type { ActionLibraryItem } from '@/lib/types';
+import { getProductInfo } from '@/lib/productMapping';
 import { v4 as uuidv4 } from 'uuid';
 import {
   Dialog,
@@ -12,20 +13,12 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { TimeRangeSelector } from './TimeRangeSelector';
-import { ReminderList } from './ReminderList';
-import { Plus, Search, Zap, ArrowLeft } from 'lucide-react';
+import { Search, Zap, ArrowLeft } from 'lucide-react';
 import { useJourney } from '@/contexts/JourneyContext';
 
 interface ActionFormProps {
@@ -56,7 +49,6 @@ export function ActionForm({
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'checklist' | 'additional'>('additional');
 
-  const actionLibraryItems = getAllActionLibraryItems();
   const selectedLibraryItem = actionTypeId ? getActionLibraryItem(actionTypeId) : null;
 
   // Get actions grouped by category
@@ -189,7 +181,6 @@ export function ActionForm({
   const supportedProducts = selectedLibraryItem?.supportedProducts || [];
 
   const showActionSelection = !existingAction && !actionTypeId;
-  const showConfiguration = existingAction || actionTypeId;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

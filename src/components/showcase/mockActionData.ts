@@ -1,4 +1,5 @@
-import type { Action, Reminder, TimeRange } from '@/lib/types';
+import type { Action } from '@/lib/types';
+// Removed unused imports: Reminder, TimeRange
 
 // Mock action data for showcasing different card variations
 export const mockEntryAction: Action = {
