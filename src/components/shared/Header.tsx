@@ -37,18 +37,6 @@ export function Header({ isSimulatorOpen, onToggleSimulator }: HeaderProps) {
 
       {/* Right Side Controls */}
       <div className="flex items-center gap-3 shrink-0">
-        {/* Action Card Showcase Link */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            window.location.hash = '#actioncard';
-          }}
-          className="gap-2"
-          title="View Action Card Design Variations"
-        >
-          <span className="hidden sm:inline">Card Designs</span>
-        </Button>
         {/* Simulator Toggle Button */}
         <Button
           variant={isSimulatorOpen ? "default" : "outline"}
