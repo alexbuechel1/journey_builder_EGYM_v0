@@ -80,10 +80,18 @@ export function ActionCard({
 
               {/* Icon + Title */}
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <div className="flex-shrink-0 w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
-                  <Zap className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                </div>
-                <div className="flex-1 min-w-0">
+                {action.completionMode === 'COUNTER' && action.requiredCount && action.requiredCount >= 2 ? (
+                  <div className="flex-shrink-0 w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
+                    <span className="text-xs font-medium text-primary">
+                      {action.requiredCount}x
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex-shrink-0 w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
+                    <Zap className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                  </div>
+                )}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <h3 className="text-sm font-semibold text-foreground truncate">{title}</h3>
                 </div>
               </div>
