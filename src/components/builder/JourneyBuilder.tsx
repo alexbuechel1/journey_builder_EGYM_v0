@@ -6,7 +6,7 @@ import { ActionForm } from './ActionForm';
 import { Button } from '@/components/ui/button';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { ToastContainer, useToast } from '@/components/ui/toast';
-import { X, Zap, Plus } from 'lucide-react';
+import { X, Zap, Plus, ZoomIn, ZoomOut } from 'lucide-react';
 import type { Action } from '@/lib/types';
 import { getActionLibraryItem } from '@/lib/actionLibrary';
 
@@ -16,7 +16,16 @@ export function JourneyBuilder() {
   const [editingAction, setEditingAction] = useState<Action | undefined>();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [actionToDelete, setActionToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
   const { toasts, showToast, dismissToast } = useToast();
+
+  const handleZoomIn = () => {
+    setZoomLevel((prev) => Math.min(prev + 0.1, 2)); // Max zoom 2x, increment by 10%
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel((prev) => Math.max(prev - 0.1, 0.5)); // Min zoom 0.5x, decrement by 10%
+  };
 
   const handleAddAction = () => {
     setEditingAction(undefined);
@@ -122,6 +131,41 @@ export function JourneyBuilder() {
 
       {/* Action List - Always with dotted canvas background */}
       <div className={`relative dotted-canvas bg-muted/30 rounded-lg -mx-6 px-6 py-6 pb-20 ${currentJourney.actions.length === 0 ? 'min-h-[calc(100vh-300px)]' : 'min-h-[calc(100vh-400px)]'}`}>
+        {/* Zoom Controls - Fixed position, not affected by zoom */}
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-1 bg-white border border-border rounded-md shadow-sm p-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleZoomOut}
+            disabled={zoomLevel <= 0.5}
+            className="h-8 w-8"
+            aria-label="Zoom out"
+          >
+            <ZoomOut className="h-4 w-4" aria-hidden="true" />
+          </Button>
+          <span className="text-xs text-muted-foreground px-2 min-w-[3rem] text-center">
+            {Math.round(zoomLevel * 100)}%
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleZoomIn}
+            disabled={zoomLevel >= 2}
+            className="h-8 w-8"
+            aria-label="Zoom in"
+          >
+            <ZoomIn className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        </div>
+
+        {/* Content container with zoom - only actions scale, canvas stays full screen */}
+        <div 
+          className="relative transition-transform duration-200"
+          style={{ 
+            transform: `scale(${zoomLevel})`,
+            transformOrigin: 'top center',
+          }}
+        >
         {currentJourney.actions.length === 0 ? (
           /* Empty state - centered card */
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -155,7 +199,7 @@ export function JourneyBuilder() {
             {/* Floating Add Action Button - Zapier style */}
             <div className="relative flex flex-col items-center">
               {/* Connection line from last action */}
-              <div className="w-0.5 h-10 bg-primary"></div>
+              <div className="w-0.5 h-4 bg-primary"></div>
               
               {/* Floating plus button */}
               <button
@@ -168,6 +212,7 @@ export function JourneyBuilder() {
             </div>
           </>
         )}
+        </div>
       </div>
 
       {/* Action Form Dialog */}

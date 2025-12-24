@@ -131,7 +131,7 @@ export function ActionList({
             <div key={action.id} className="flex flex-col items-center w-full">
               {/* Connection line above action (except for first action) */}
               {index > 0 && (
-                <div className="w-0.5 h-10 bg-primary"></div>
+                <div className="w-0.5 h-4 bg-primary"></div>
               )}
               <div className="w-full max-w-sm mx-auto">
                 <SortableActionCard
@@ -144,7 +144,7 @@ export function ActionList({
               </div>
               {/* Connection line below action (only if not the last action) */}
               {index < actions.length - 1 && (
-                <div className="w-0.5 h-10 bg-primary"></div>
+                <div className="w-0.5 h-4 bg-primary"></div>
               )}
             </div>
           ))}
