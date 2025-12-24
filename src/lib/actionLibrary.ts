@@ -18,7 +18,7 @@ export const ACTION_LIBRARY: Record<string, ActionLibraryItem> = {
     id: 'A02',
     title: 'Check-In done',
     eventType: 'CHECKIN_DONE',
-    completionMode: 'OCCURRENCE',
+    completionMode: 'COUNTER',
     supportedProducts: ['MMS'],
     supportsGuidance: false,
     defaultGuidanceEnabled: false,
@@ -119,8 +119,8 @@ export const ACTION_LIBRARY: Record<string, ActionLibraryItem> = {
     eventType: 'WORKOUT_TRACKED',
     completionMode: 'COUNTER',
     supportedProducts: ['SMART_STRENGTH', 'BMA', 'TRAINER_APP'],
-    supportsGuidance: false,
-    defaultGuidanceEnabled: false,
+    supportsGuidance: true,
+    defaultGuidanceEnabled: true,
   },
   A14: {
     id: 'A14',
@@ -128,6 +128,15 @@ export const ACTION_LIBRARY: Record<string, ActionLibraryItem> = {
     eventType: 'MACHINE_SETTINGS_CREATED',
     completionMode: 'OCCURRENCE',
     supportedProducts: ['FITHUB', 'TRAINER_APP'],
+    supportsGuidance: true,
+    defaultGuidanceEnabled: true,
+  },
+  A15: {
+    id: 'A15',
+    title: 'BioAge checked',
+    eventType: 'BIOAGE_CHECKED',
+    completionMode: 'COUNTER',
+    supportedProducts: ['FITHUB', 'TRAINER_APP', 'BMA'],
     supportsGuidance: true,
     defaultGuidanceEnabled: true,
   },
@@ -172,6 +181,7 @@ export const ACTION_CATEGORIES: Record<string, ActionCategory> = {
   A03: 'Assessments', // Strength test done
   A04: 'Assessments', // Flexibility test done
   A07: 'Assessments', // BioAge calculated
+  A15: 'Assessments', // BioAge checked
   A12: 'Training Plan', // Fitness Goals defined
   A05: 'Training Plan', // Training plan created
   A06: 'Training Plan', // Training plan expired

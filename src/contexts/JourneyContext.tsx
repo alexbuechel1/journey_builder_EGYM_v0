@@ -89,23 +89,39 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
                   timeRange: {
                     type: action.time_range_type as Action['timeRange']['type'],
                     durationDays: action.time_range_duration_days || undefined,
+                    durationUnit: (action.time_range_duration_unit as Action['timeRange']['durationUnit']) || 'DAYS',
                     offsetDays: action.time_range_offset_days || undefined,
+                    offsetUnit: (action.time_range_offset_unit as Action['timeRange']['offsetUnit']) || 'DAYS',
                   },
                 } as Action;
               })
             );
 
-            return {
-              id: journey.id,
-              name: journey.name,
-              isDefault: journey.is_default,
-              nodes: (nodes || []).map((n) => ({
+            // Sort nodes by position
+            const sortedNodes = (nodes || [])
+              .map((n) => ({
                 id: n.id,
                 nodeType: n.node_type as Journey['nodes'][0]['nodeType'],
                 actionId: n.action_id || undefined,
                 position: n.position,
-              })),
-              actions,
+              }))
+              .sort((a, b) => a.position - b.position);
+
+            // Sort actions by their corresponding node positions
+            const sortedActions = actions.sort((a, b) => {
+              const nodeA = sortedNodes.find((n) => n.actionId === a.id);
+              const nodeB = sortedNodes.find((n) => n.actionId === b.id);
+              const posA = nodeA?.position ?? 9999;
+              const posB = nodeB?.position ?? 9999;
+              return posA - posB;
+            });
+
+            return {
+              id: journey.id,
+              name: journey.name,
+              isDefault: journey.is_default,
+              nodes: sortedNodes,
+              actions: sortedActions,
               createdAt: new Date(journey.created_at),
               updatedAt: new Date(journey.updated_at),
             } as Journey;
@@ -217,7 +233,9 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
           guidance_enabled: newAction.guidanceEnabled,
           time_range_type: newAction.timeRange.type,
           time_range_duration_days: newAction.timeRange.durationDays || null,
+          time_range_duration_unit: newAction.timeRange.durationUnit || 'DAYS',
           time_range_offset_days: newAction.timeRange.offsetDays || null,
+          time_range_offset_unit: newAction.timeRange.offsetUnit || 'DAYS',
         });
 
         if (actionError) throw actionError;
@@ -306,7 +324,9 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
             guidance_enabled: action.guidanceEnabled,
             time_range_type: action.timeRange.type,
             time_range_duration_days: action.timeRange.durationDays || null,
+            time_range_duration_unit: action.timeRange.durationUnit || 'DAYS',
             time_range_offset_days: action.timeRange.offsetDays || null,
+            time_range_offset_unit: action.timeRange.offsetUnit || 'DAYS',
             updated_at: new Date().toISOString(),
           })
           .eq('id', actionId);
@@ -410,20 +430,29 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
     // Update positions in Supabase if configured
     if (isSupabaseConfigured() && supabase) {
       try {
-        await Promise.all(
-          updatedNodes.map((node) =>
-            supabase!
-              .from('journey_nodes')
-              .update({ position: node.position })
-              .eq('id', node.id)
-          )
+        // Update all node positions in a transaction-like manner
+        const updatePromises = updatedNodes.map((node) =>
+          supabase!
+            .from('journey_nodes')
+            .update({ position: node.position })
+            .eq('id', node.id)
         );
-        await supabase!
+        
+        await Promise.all(updatePromises);
+        
+        // Update journey timestamp
+        const { error: journeyError } = await supabase!
           .from('journeys')
           .update({ updated_at: new Date().toISOString() })
           .eq('id', currentJourney.id);
+          
+        if (journeyError) {
+          console.error('Error updating journey timestamp:', journeyError);
+        }
       } catch (error) {
         console.error('Error reordering actions in Supabase:', error);
+        // Re-throw to show error to user
+        throw error;
       }
     }
   }, [currentJourney]);

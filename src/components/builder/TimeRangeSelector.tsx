@@ -2,6 +2,8 @@ import type { TimeRange, TimeRangeType, TimeUnit, Reminder } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
+type TimeRangeRadioValue = TimeRangeType | 'IMMEDIATE_SEQUENCE';
 import {
   Select,
   SelectContent,
@@ -54,7 +56,7 @@ export function TimeRangeSelector({
   onRemindersChange,
   onAddReminder,
 }: TimeRangeSelectorProps) {
-  const handleTypeChange = (type: TimeRangeType) => {
+  const handleTypeChange = (type: TimeRangeRadioValue) => {
     if (type === 'NONE') {
       onChange({ type: 'NONE' });
     } else if (type === 'ABSOLUTE') {
@@ -63,13 +65,28 @@ export function TimeRangeSelector({
         durationDays: value.durationDays || 7,
         durationUnit: value.durationUnit || 'DAYS'
       });
+    } else if (type === 'IMMEDIATE_SEQUENCE') {
+      // Immediate sequence is stored as WITH_PREVIOUS with offsetDays: 0
+      onChange({ 
+        type: 'WITH_PREVIOUS', 
+        offsetDays: 0,
+        offsetUnit: 'DAYS'
+      });
     } else if (type === 'WITH_PREVIOUS') {
       onChange({ 
         type: 'WITH_PREVIOUS', 
-        offsetDays: value.offsetDays || 1,
+        offsetDays: value.offsetDays && value.offsetDays > 0 ? value.offsetDays : 1,
         offsetUnit: value.offsetUnit || 'DAYS'
       });
     }
+  };
+  
+  // Determine the current radio value based on timeRange
+  const getCurrentRadioValue = (): TimeRangeRadioValue => {
+    if (value.type === 'WITH_PREVIOUS' && (value.offsetDays === 0 || value.offsetDays === undefined)) {
+      return 'IMMEDIATE_SEQUENCE';
+    }
+    return value.type;
   };
 
   const handleDurationChange = (newValue: number | undefined, unit: TimeUnit) => {
@@ -85,7 +102,7 @@ export function TimeRangeSelector({
     const days = displayValueToDays(newValue, unit);
     onChange({
       ...value,
-      offsetDays: days,
+      offsetDays: days === 0 ? 0 : days, // Explicitly set 0 for immediate
       offsetUnit: unit,
     });
   };
@@ -104,7 +121,7 @@ export function TimeRangeSelector({
         </p>
       </div>
       
-      <RadioGroup value={value.type} onValueChange={handleTypeChange}>
+      <RadioGroup value={getCurrentRadioValue()} onValueChange={handleTypeChange}>
         <div className="space-y-3">
           {/* No deadline option */}
           <div className="flex items-start space-x-3">
@@ -168,6 +185,28 @@ export function TimeRangeSelector({
             </div>
           </div>
 
+          {/* Immediate sequence option */}
+          {previousActionExists && (
+            <div className="flex items-start space-x-3">
+              <RadioGroupItem value="IMMEDIATE_SEQUENCE" id="time-immediate" className="mt-1" />
+              <div className="flex-1">
+                <Label htmlFor="time-immediate" className="cursor-pointer">
+                  <div className="text-body-50 font-medium text-foreground">With previous</div>
+                  <div className="text-body-50 text-muted-foreground text-xs mt-0.5">
+                    Actions happen together (grouped in checklist)
+                  </div>
+                </Label>
+                {getCurrentRadioValue() === 'IMMEDIATE_SEQUENCE' && (
+                  <div className="mt-3 p-3 rounded-md bg-primary/5 border border-primary/20">
+                    <p className="text-xs text-muted-foreground">
+                      These actions will appear grouped together in the member checklist, indicating they typically happen in sequence during the app flow.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* After previous option */}
           {previousActionExists && (
             <div className="flex items-start space-x-3">
@@ -176,22 +215,22 @@ export function TimeRangeSelector({
                 <Label htmlFor="time-previous" className="cursor-pointer">
                   <div className="text-body-50 font-medium text-foreground">After previous</div>
                   <div className="text-body-50 text-muted-foreground text-xs mt-0.5">
-                    Relative to previous action
+                    Set a delay after the previous action completes
                   </div>
                 </Label>
-                {value.type === 'WITH_PREVIOUS' && (
+                {getCurrentRadioValue() === 'WITH_PREVIOUS' && (
                   <div className="flex items-center gap-2 mt-3">
                     <Input
                       type="number"
                       min="1"
                       step="1"
-                      value={displayOffset || ''}
+                      value={displayOffset !== undefined && displayOffset > 0 ? displayOffset : ''}
                       onChange={(e) => {
                         const numValue = e.target.value ? parseInt(e.target.value, 10) : undefined;
-                        if (numValue && numValue > 0) {
+                        if (numValue !== undefined && numValue > 0) {
                           handleOffsetChange(numValue, value.offsetUnit || 'DAYS');
                         } else if (e.target.value === '') {
-                          handleOffsetChange(undefined, value.offsetUnit || 'DAYS');
+                          handleOffsetChange(1, value.offsetUnit || 'DAYS');
                         }
                       }}
                       className="w-24 h-9"
@@ -200,7 +239,7 @@ export function TimeRangeSelector({
                     <Select
                       value={value.offsetUnit || 'DAYS'}
                       onValueChange={(unit) => {
-                        const currentDisplay = displayOffset;
+                        const currentDisplay = displayOffset && displayOffset > 0 ? displayOffset : 1;
                         handleOffsetChange(currentDisplay, unit as TimeUnit);
                       }}
                     >

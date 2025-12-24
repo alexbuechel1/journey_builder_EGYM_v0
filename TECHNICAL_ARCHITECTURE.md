@@ -96,7 +96,7 @@ journey_builder_EGYM_v0/
 ```typescript
 // src/lib/types.ts
 
-export type Product = 'BMA' | 'FITHUB' | 'TRAINER_APP' | 'SMART_STRENGTH' | 'UNKNOWN';
+export type Product = 'BMA' | 'FITHUB' | 'TRAINER_APP' | 'SMART_STRENGTH' | 'MMS';
 export type CompletionMode = 'OCCURRENCE' | 'COUNTER';
 export type TimeRangeType = 'NONE' | 'ABSOLUTE' | 'WITH_PREVIOUS';
 export type ReminderChannel = 'PUSH' | 'EMAIL' | 'TRAINER' | 'WEBHOOK';
@@ -218,12 +218,14 @@ CREATE TABLE actions (
   event_type TEXT NOT NULL,
   completion_mode TEXT NOT NULL CHECK (completion_mode IN ('OCCURRENCE', 'COUNTER')),
   required_count INTEGER, -- nullable, only if COUNTER
-  product TEXT NOT NULL CHECK (product IN ('BMA', 'FITHUB', 'TRAINER_APP', 'SMART_STRENGTH', 'UNKNOWN')),
+  product TEXT NOT NULL CHECK (product IN ('BMA', 'FITHUB', 'TRAINER_APP', 'SMART_STRENGTH', 'MMS')),
   visible_in_checklist BOOLEAN DEFAULT true,
   guidance_enabled BOOLEAN DEFAULT false,
   time_range_type TEXT NOT NULL CHECK (time_range_type IN ('NONE', 'ABSOLUTE', 'WITH_PREVIOUS')),
   time_range_duration_days INTEGER, -- nullable, for ABSOLUTE
+  time_range_duration_unit TEXT CHECK (time_range_duration_unit IN ('DAYS', 'WEEKS', 'MONTHS')), -- nullable, for ABSOLUTE
   time_range_offset_days INTEGER, -- nullable, for WITH_PREVIOUS
+  time_range_offset_unit TEXT CHECK (time_range_offset_unit IN ('DAYS', 'WEEKS', 'MONTHS')), -- nullable, for WITH_PREVIOUS
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -590,7 +592,7 @@ export function createDefaultJourney(): Omit<Journey, 'id' | 'createdAt' | 'upda
         actionTypeId: 'A01', // EGYM Account created (Entry)
         eventType: 'EGYM_ACCOUNT_CREATED',
         completionMode: 'OCCURRENCE',
-        supportedProducts: ['BMA', 'FITHUB', 'TRAINER_APP', 'SMART_STRENGTH', 'UNKNOWN'],
+        supportedProducts: ['BMA', 'FITHUB', 'TRAINER_APP', 'SMART_STRENGTH', 'MMS'],
         product: 'BMA',
         visibleInChecklist: true,
         supportsGuidance: true,

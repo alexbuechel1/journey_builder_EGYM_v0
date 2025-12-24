@@ -146,7 +146,7 @@ export function ActionForm({
       errors.timeRange = 'Duration must be at least 1 day';
     }
 
-    if (timeRange.type === 'WITH_PREVIOUS' && (!timeRange.offsetDays || timeRange.offsetDays < 1)) {
+    if (timeRange.type === 'WITH_PREVIOUS' && timeRange.offsetDays !== undefined && timeRange.offsetDays !== 0 && timeRange.offsetDays < 1) {
       errors.timeRange = 'Offset must be at least 1 day';
     }
 

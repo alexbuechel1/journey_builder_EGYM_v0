@@ -40,9 +40,48 @@ export function ActionCard({
   const getTimeRangeLabel = () => {
     if (action.timeRange.type === 'NONE') return 'No deadline';
     if (action.timeRange.type === 'ABSOLUTE') {
-      return `${action.timeRange.durationDays} day${action.timeRange.durationDays !== 1 ? 's' : ''} from start`;
+      const unit = action.timeRange.durationUnit || 'DAYS';
+      const days = action.timeRange.durationDays || 0;
+      
+      // Convert days to display value based on unit
+      let displayValue: number;
+      let unitLabel: string;
+      if (unit === 'WEEKS') {
+        displayValue = Math.round(days / 7);
+        unitLabel = displayValue === 1 ? 'week' : 'weeks';
+      } else if (unit === 'MONTHS') {
+        displayValue = Math.round(days / 30);
+        unitLabel = displayValue === 1 ? 'month' : 'months';
+      } else {
+        displayValue = days;
+        unitLabel = days === 1 ? 'day' : 'days';
+      }
+      
+      return `${displayValue} ${unitLabel} from start`;
     }
-    return `${action.timeRange.offsetDays} day${action.timeRange.offsetDays !== 1 ? 's' : ''} after previous`;
+    // WITH_PREVIOUS
+    if (action.timeRange.offsetDays === 0 || action.timeRange.offsetDays === undefined) {
+      return 'With previous';
+    }
+    
+    const unit = action.timeRange.offsetUnit || 'DAYS';
+    const days = action.timeRange.offsetDays;
+    
+    // Convert days to display value based on unit
+    let displayValue: number;
+    let unitLabel: string;
+    if (unit === 'WEEKS') {
+      displayValue = Math.round(days / 7);
+      unitLabel = displayValue === 1 ? 'week' : 'weeks';
+    } else if (unit === 'MONTHS') {
+      displayValue = Math.round(days / 30);
+      unitLabel = displayValue === 1 ? 'month' : 'months';
+    } else {
+      displayValue = days;
+      unitLabel = days === 1 ? 'day' : 'days';
+    }
+    
+    return `${displayValue} ${unitLabel} after previous`;
   };
 
   const getChannelIcon = (channel: ReminderChannel) => {
