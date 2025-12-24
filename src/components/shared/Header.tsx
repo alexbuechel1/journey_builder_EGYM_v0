@@ -1,4 +1,4 @@
-import { Smartphone, X } from 'lucide-react';
+import { Smartphone, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // Figma image assets
@@ -8,11 +8,12 @@ const chevronDown = "https://www.figma.com/api/mcp/asset/9b208332-cae9-4fe8-a55b
 const userAvatar = "https://www.figma.com/api/mcp/asset/a6fdd0aa-c530-4c96-bcd9-ed97f5730cfa";
 
 interface HeaderProps {
-  isSimulatorOpen: boolean;
-  onToggleSimulator: () => void;
+  currentPage: 'journey' | 'simulator' | 'actioncard';
+  onNavigateToSimulator: () => void;
+  onNavigateToJourney: () => void;
 }
 
-export function Header({ isSimulatorOpen, onToggleSimulator }: HeaderProps) {
+export function Header({ currentPage, onNavigateToSimulator, onNavigateToJourney }: HeaderProps) {
   return (
     <div className="bg-card border-b border-border h-[60px] flex items-center gap-[28px] px-[28px]">
       {/* EGYM Logo - Left Aligned */}
@@ -37,25 +38,27 @@ export function Header({ isSimulatorOpen, onToggleSimulator }: HeaderProps) {
 
       {/* Right Side Controls */}
       <div className="flex items-center gap-3 shrink-0">
-        {/* Simulator Toggle Button */}
+        {/* Navigation Buttons */}
         <Button
-          variant={isSimulatorOpen ? "default" : "outline"}
+          variant={currentPage === 'journey' ? "default" : "outline"}
           size="sm"
-          onClick={onToggleSimulator}
+          onClick={onNavigateToJourney}
           className="gap-2"
-          title={isSimulatorOpen ? "Close Simulator" : "Open Simulator"}
+          title="Journey Builder"
         >
-          {isSimulatorOpen ? (
-            <>
-              <X className="h-6 w-6" />
-              <span className="hidden sm:inline">Close Simulator</span>
-            </>
-          ) : (
-            <>
-              <Smartphone className="h-6 w-6" />
-              <span className="hidden sm:inline">Open Simulator</span>
-            </>
-          )}
+          <LayoutDashboard className="h-4 w-4" />
+          <span className="hidden sm:inline">Journey Builder</span>
+        </Button>
+
+        <Button
+          variant={currentPage === 'simulator' ? "default" : "outline"}
+          size="sm"
+          onClick={onNavigateToSimulator}
+          className="gap-2"
+          title="Member App Simulator"
+        >
+          <Smartphone className="h-4 w-4" />
+          <span className="hidden sm:inline">Simulator</span>
         </Button>
 
         {/* User Profile */}

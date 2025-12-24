@@ -1,18 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from './components/shared/Header';
 import { SideNav } from './components/shared/SideNav';
 import { Sidebar } from './components/shared/Sidebar';
-import { JourneyBuilder } from './components/builder/JourneyBuilder';
+import { JourneyBuilderPage } from './pages/JourneyBuilderPage';
+import { SimulatorPage } from './pages/SimulatorPage';
+type Page = 'journey' | 'simulator';
 
 function App() {
-  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState<Page>(() => {
+    // Check URL hash for routing
+    if (typeof window !== 'undefined') {
+      if (window.location.hash === '#simulator') return 'simulator';
+    }
+    return 'journey';
+  });
+
+  // Update page when hash changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#simulator') {
+        setCurrentPage('simulator');
+      } else {
+        setCurrentPage('journey');
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const handleNavigateToSimulator = () => {
+    window.location.hash = '#simulator';
+    setCurrentPage('simulator');
+  };
+
+  const handleNavigateToJourney = () => {
+    window.location.hash = '';
+    setCurrentPage('journey');
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <Header 
-        isSimulatorOpen={isSimulatorOpen}
-        onToggleSimulator={() => setIsSimulatorOpen(!isSimulatorOpen)}
+        currentPage={currentPage}
+        onNavigateToSimulator={handleNavigateToSimulator}
+        onNavigateToJourney={handleNavigateToJourney}
       />
 
       {/* Main Layout */}
@@ -25,23 +58,11 @@ function App() {
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-auto">
-          <div className="p-6">
-            <div className={isSimulatorOpen ? "grid grid-cols-2 gap-6" : ""}>
-              <div className={isSimulatorOpen ? "bg-card rounded-lg card-shadow p-6" : ""}>
-                <JourneyBuilder />
-              </div>
-              {isSimulatorOpen && (
-                <div className="bg-card rounded-lg card-shadow p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-foreground">
-                    Member App Simulator
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Simulator panel will be implemented here
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+          {currentPage === 'simulator' ? (
+            <SimulatorPage />
+          ) : (
+            <JourneyBuilderPage />
+          )}
         </div>
       </div>
     </div>

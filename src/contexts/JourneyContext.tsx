@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { Journey, Action, Reminder } from '@/lib/types';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
+import { getActionLibraryItem } from '@/lib/actionLibrary';
 
 interface JourneyContextValue {
   currentJourney: Journey | null;
@@ -13,6 +14,7 @@ interface JourneyContextValue {
   reorderActions: (actionIds: string[]) => Promise<void>;
   loadJourneys: () => Promise<void>;
   saveJourney: () => Promise<void>;
+  updateJourneyName: (name: string) => Promise<void>;
   createJourney: (name: string) => Promise<void>;
   isLoading: boolean;
   isLoadingActions: boolean;
@@ -64,8 +66,25 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
                   .eq('action_id', action.id)
                   .order('order_index');
 
+                // Get action library item to populate supportedProducts and supportsGuidance
+                const libraryItem = getActionLibraryItem(action.action_type_id);
+
                 return {
-                  ...action,
+                  id: action.id,
+                  actionTypeId: action.action_type_id,
+                  eventType: action.event_type,
+                  completionMode: action.completion_mode as Action['completionMode'],
+                  requiredCount: action.required_count || undefined,
+                  supportedProducts: libraryItem?.supportedProducts || [],
+                  product: action.product as Action['product'],
+                  visibleInChecklist: action.visible_in_checklist,
+                  supportsGuidance: libraryItem?.supportsGuidance || false,
+                  guidanceEnabled: action.guidance_enabled,
+                  timeRange: {
+                    type: action.time_range_type as Action['timeRange']['type'],
+                    durationDays: action.time_range_duration_days || undefined,
+                    offsetDays: action.time_range_offset_days || undefined,
+                  },
                   reminders: (reminders || []).map((r) => ({
                     id: r.id,
                     channel: r.channel as Reminder['channel'],
@@ -73,11 +92,6 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
                     frequencyDays: r.frequency_days || undefined,
                     order: r.order_index,
                   })),
-                  timeRange: {
-                    type: action.time_range_type as Action['timeRange']['type'],
-                    durationDays: action.time_range_duration_days || undefined,
-                    offsetDays: action.time_range_offset_days || undefined,
-                  },
                 } as Action;
               })
             );
@@ -108,7 +122,7 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
         // Mock mode - create a default journey
         const mockJourney: Journey = {
           id: 'mock-journey-1',
-          name: 'Default Onboarding Journey',
+          name: 'Gym A — Onboarding Journey (Default)',
           isDefault: true,
           nodes: [
             { id: 'start-1', nodeType: 'START', position: 0 },
@@ -127,7 +141,7 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
       // Fallback to mock data
       const mockJourney: Journey = {
         id: 'mock-journey-1',
-        name: 'Default Onboarding Journey',
+        name: 'Gym A — Onboarding Journey (Default)',
         isDefault: true,
         nodes: [{ id: 'start-1', nodeType: 'START', position: 0 }],
         actions: [],
@@ -433,6 +447,50 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentJourney]);
 
+  const updateJourneyName = useCallback(
+    async (name: string) => {
+      if (!currentJourney) {
+        throw new Error('No journey selected');
+      }
+
+      setIsLoadingActions(true);
+      setError(null);
+
+      try {
+        const updatedJourney: Journey = {
+          ...currentJourney,
+          name,
+          updatedAt: new Date(),
+        };
+
+        setCurrentJourneyState(updatedJourney);
+        setJourneys((prev) =>
+          prev.map((j) => (j.id === currentJourney.id ? updatedJourney : j))
+        );
+
+        // Save to Supabase if configured
+        if (isSupabaseConfigured() && supabase) {
+          const { error } = await supabase!
+            .from('journeys')
+            .update({
+              name,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', currentJourney.id);
+
+          if (error) throw error;
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to update journey name';
+        setError(errorMessage);
+        throw error;
+      } finally {
+        setIsLoadingActions(false);
+      }
+    },
+    [currentJourney]
+  );
+
   const createJourney = useCallback(async (name: string) => {
     const newJourney: Journey = {
       id: uuidv4(),
@@ -485,6 +543,7 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
         reorderActions,
         loadJourneys,
         saveJourney,
+        updateJourneyName,
         createJourney,
         isLoading,
         isLoadingActions,
