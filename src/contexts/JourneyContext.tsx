@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Journey, Action, Reminder } from '@/lib/types';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { getActionLibraryItem } from '@/lib/actionLibrary';
 import { v4 as uuidv4 } from 'uuid';
 
 interface JourneyContextValue {
@@ -64,8 +65,20 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
                   .eq('action_id', action.id)
                   .order('order_index');
 
+                // Get action library item to get supportedProducts and supportsGuidance
+                const libraryItem = getActionLibraryItem(action.action_type_id);
+
                 return {
-                  ...action,
+                  id: action.id,
+                  actionTypeId: action.action_type_id,
+                  eventType: action.event_type,
+                  completionMode: action.completion_mode as Action['completionMode'],
+                  requiredCount: action.required_count || undefined,
+                  supportedProducts: libraryItem?.supportedProducts || [],
+                  product: action.product as Action['product'],
+                  visibleInChecklist: action.visible_in_checklist,
+                  supportsGuidance: libraryItem?.supportsGuidance || false,
+                  guidanceEnabled: action.guidance_enabled,
                   reminders: (reminders || []).map((r) => ({
                     id: r.id,
                     channel: r.channel as Reminder['channel'],
