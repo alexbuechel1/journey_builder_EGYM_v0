@@ -6,7 +6,8 @@ import { ActionForm } from './ActionForm';
 import { Button } from '@/components/ui/button';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { ToastContainer, useToast } from '@/components/ui/toast';
-import { X, Zap, Plus, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, Zap, Plus, ZoomIn, ZoomOut, Minus, Maximize2, Maximize } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Action } from '@/lib/types';
 import { getActionLibraryItem } from '@/lib/actionLibrary';
 
@@ -17,6 +18,8 @@ export function JourneyBuilder() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [actionToDelete, setActionToDelete] = useState<{ id: string; title: string } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
+  type ExpandState = 'collapsed' | 'expanded' | 'fully-expanded';
+  const [expandState, setExpandState] = useState<ExpandState>('expanded');
   const { toasts, showToast, dismissToast } = useToast();
 
   const handleZoomIn = () => {
@@ -131,31 +134,72 @@ export function JourneyBuilder() {
 
       {/* Action List - Always with dotted canvas background */}
       <div className={`relative dotted-canvas bg-muted/30 rounded-lg -mx-6 px-6 py-6 pb-20 ${currentJourney.actions.length === 0 ? 'min-h-[calc(100vh-300px)]' : 'min-h-[calc(100vh-400px)]'}`}>
-        {/* Zoom Controls - Fixed position, not affected by zoom */}
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-1 bg-white border border-border rounded-md shadow-sm p-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleZoomOut}
-            disabled={zoomLevel <= 0.5}
-            className="h-8 w-8"
-            aria-label="Zoom out"
-          >
-            <ZoomOut className="h-4 w-4" aria-hidden="true" />
-          </Button>
-          <span className="text-xs text-muted-foreground px-2 min-w-[3rem] text-center">
-            {Math.round(zoomLevel * 100)}%
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleZoomIn}
-            disabled={zoomLevel >= 2}
-            className="h-8 w-8"
-            aria-label="Zoom in"
-          >
-            <ZoomIn className="h-4 w-4" aria-hidden="true" />
-          </Button>
+        {/* Controls - Fixed position, not affected by zoom */}
+        <div className="absolute top-4 right-4 z-20 flex flex-col gap-1">
+          {/* Zoom Controls */}
+          <div className="flex items-center gap-1 bg-white border border-border rounded-md shadow-sm p-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleZoomOut}
+              disabled={zoomLevel <= 0.5}
+              className="h-8 w-8"
+              aria-label="Zoom out"
+            >
+              <ZoomOut className="h-4 w-4" aria-hidden="true" />
+            </Button>
+            <span className="text-xs text-muted-foreground px-2 min-w-[3rem] text-center">
+              {Math.round(zoomLevel * 100)}%
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleZoomIn}
+              disabled={zoomLevel >= 2}
+              className="h-8 w-8"
+              aria-label="Zoom in"
+            >
+              <ZoomIn className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </div>
+          
+          {/* Expand State Selector */}
+          <div className="bg-white border border-border rounded-md shadow-sm p-1">
+            <Select value={expandState} onValueChange={(value) => setExpandState(value as ExpandState)}>
+              <SelectTrigger className="h-8 w-full border-0 shadow-none focus:ring-0 px-2 py-0 text-xs">
+                <div className="flex items-center gap-1.5 flex-1">
+                  {expandState === 'collapsed' && <Minus className="h-3.5 w-3.5 text-muted-foreground" />}
+                  {expandState === 'expanded' && <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />}
+                  {expandState === 'fully-expanded' && <Maximize className="h-3.5 w-3.5 text-muted-foreground" />}
+                  <SelectValue>
+                    <span className="text-xs text-muted-foreground">
+                      {expandState === 'collapsed' ? 'Collapsed' : expandState === 'expanded' ? 'Expanded' : 'Full'}
+                    </span>
+                  </SelectValue>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="collapsed">
+                  <div className="flex items-center gap-2">
+                    <Minus className="h-4 w-4" />
+                    <span>Collapsed</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="expanded">
+                  <div className="flex items-center gap-2">
+                    <Maximize2 className="h-4 w-4" />
+                    <span>Expanded</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="fully-expanded">
+                  <div className="flex items-center gap-2">
+                    <Maximize className="h-4 w-4" />
+                    <span>Fully Expanded</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Content container with zoom - only actions scale, canvas stays full screen */}
@@ -194,12 +238,13 @@ export function JourneyBuilder() {
               onEdit={handleEditAction}
               onDelete={handleDeleteClick}
               onUpdate={handleUpdateAction}
+              expandState={expandState}
             />
             
             {/* Floating Add Action Button - Zapier style */}
             <div className="relative flex flex-col items-center">
               {/* Connection line from last action */}
-              <div className="w-0.5 h-4 bg-primary"></div>
+              <div className={`w-0.5 bg-primary ${expandState === 'collapsed' ? 'h-1' : 'h-4'}`}></div>
               
               {/* Floating plus button */}
               <button

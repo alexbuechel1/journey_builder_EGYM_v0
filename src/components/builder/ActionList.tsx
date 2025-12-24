@@ -26,6 +26,7 @@ interface ActionListProps {
   onEdit: (action: Action) => void;
   onDelete: (actionId: string) => void;
   onUpdate: (actionId: string, updates: Partial<Action>) => void;
+  expandState?: 'collapsed' | 'expanded' | 'fully-expanded';
 }
 
 function SortableActionCard({
@@ -34,12 +35,14 @@ function SortableActionCard({
   onEdit,
   onDelete,
   isOver,
+  expandState,
 }: {
   action: Action;
   isEntryAction: boolean;
   onEdit: (action: Action) => void;
   onDelete: (actionId: string) => void;
   isOver?: boolean;
+  expandState?: 'collapsed' | 'expanded' | 'fully-expanded';
 }) {
   const {
     attributes,
@@ -68,6 +71,7 @@ function SortableActionCard({
         onEdit={() => onEdit(action)}
         onDelete={() => onDelete(action.id)}
         dragHandleProps={{ ...attributes, ...listeners }}
+        expandState={expandState}
       />
     </div>
   );
@@ -78,6 +82,7 @@ export function ActionList({
   onEdit,
   onDelete,
   onUpdate: _onUpdate,
+  expandState = 'expanded',
 }: ActionListProps) {
   const { reorderActions } = useJourney();
   const [activeId, setActiveId] = React.useState<string | null>(null);
@@ -131,7 +136,7 @@ export function ActionList({
             <div key={action.id} className="flex flex-col items-center w-full">
               {/* Connection line above action (except for first action) */}
               {index > 0 && (
-                <div className="w-0.5 h-4 bg-primary"></div>
+                <div className={`w-0.5 bg-primary ${expandState === 'collapsed' ? 'h-1' : 'h-4'}`}></div>
               )}
               <div className="w-full max-w-sm mx-auto">
                 <SortableActionCard
@@ -140,11 +145,12 @@ export function ActionList({
                   onEdit={onEdit}
                   onDelete={onDelete}
                   isOver={overId === action.id && activeId !== action.id}
+                  expandState={expandState}
                 />
               </div>
               {/* Connection line below action (only if not the last action) */}
               {index < actions.length - 1 && (
-                <div className="w-0.5 h-4 bg-primary"></div>
+                <div className={`w-0.5 bg-primary ${expandState === 'collapsed' ? 'h-1' : 'h-4'}`}></div>
               )}
             </div>
           ))}

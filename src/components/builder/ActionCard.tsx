@@ -14,6 +14,7 @@ interface ActionCardProps {
   onEdit: () => void;
   onDelete: () => void;
   dragHandleProps?: any;
+  expandState?: 'collapsed' | 'expanded' | 'fully-expanded';
 }
 
 export function ActionCard({
@@ -22,12 +23,19 @@ export function ActionCard({
   onEdit,
   onDelete,
   dragHandleProps,
+  expandState = 'expanded',
 }: ActionCardProps) {
   const [isConfigExpanded, setIsConfigExpanded] = useState(false);
   const [isRemindersExpanded, setIsRemindersExpanded] = useState(false);
   const libraryItem = getActionLibraryItem(action.actionTypeId);
   const title = libraryItem?.title || action.actionTypeId;
   const productInfo = getProductInfo(action.product);
+  
+  // Determine if sections should be expanded based on expandState
+  const isCollapsed = expandState === 'collapsed';
+  const isFullyExpanded = expandState === 'fully-expanded';
+  const shouldShowConfigExpanded = isFullyExpanded || isConfigExpanded;
+  const shouldShowRemindersExpanded = isFullyExpanded || isRemindersExpanded;
   
   const getTimeRangeLabel = () => {
     if (action.timeRange.type === 'NONE') return 'No deadline';
@@ -66,7 +74,7 @@ export function ActionCard({
         )}
         
         {/* Header Section */}
-        <div className="px-4 py-3 border-b border-border bg-muted/30">
+        <div className={`px-4 py-3 ${isCollapsed ? '' : 'border-b border-border'} bg-muted/30`}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 flex-1 min-w-0">
               {/* Drag Handle */}
@@ -121,18 +129,23 @@ export function ActionCard({
           </div>
         </div>
 
+        {/* Content Sections - Only show when not collapsed */}
+        {!isCollapsed && (
+          <>
+
         {/* Configuration Options - Collapsible, read-only */}
         <div className="px-4 py-3 border-t border-border">
           <button
             onClick={() => setIsConfigExpanded(!isConfigExpanded)}
-            className="w-full flex items-center justify-between gap-2.5 mb-3 group"
-            aria-label={isConfigExpanded ? 'Collapse configuration' : 'Expand configuration'}
-            aria-expanded={isConfigExpanded}
+            disabled={isFullyExpanded}
+            className="w-full flex items-center justify-between gap-2.5 mb-3 group disabled:opacity-50 disabled:cursor-default"
+            aria-label={shouldShowConfigExpanded ? 'Collapse configuration' : 'Expand configuration'}
+            aria-expanded={shouldShowConfigExpanded}
           >
             <div className="flex items-center gap-2.5 flex-wrap">
               <Settings className="h-4 w-4 text-primary" aria-hidden="true" />
               <span className="text-sm font-medium text-foreground">Configuration</span>
-              {!isConfigExpanded && (
+              {!shouldShowConfigExpanded && (
                 <>
                   {/* Product icon - First */}
                   <Tooltip>
@@ -198,14 +211,14 @@ export function ActionCard({
                 </>
               )}
             </div>
-            {isConfigExpanded ? (
+            {shouldShowConfigExpanded ? (
               <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
             ) : (
               <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
             )}
           </button>
 
-          {isConfigExpanded && (
+          {shouldShowConfigExpanded && (
             <div className="flex flex-col gap-2">
               {/* Product - First */}
               <div className="flex items-center gap-2.5 p-2.5 rounded-md border border-border bg-muted/30">
@@ -259,9 +272,10 @@ export function ActionCard({
           <div className="px-4 py-3 border-t border-border">
             <button
               onClick={() => setIsRemindersExpanded(!isRemindersExpanded)}
-              className="w-full flex items-center justify-between gap-2.5 mb-3 flex-wrap group"
-              aria-label={isRemindersExpanded ? 'Collapse reminders' : 'Expand reminders'}
-              aria-expanded={isRemindersExpanded}
+              disabled={isFullyExpanded}
+              className="w-full flex items-center justify-between gap-2.5 mb-3 flex-wrap group disabled:opacity-50 disabled:cursor-default"
+              aria-label={shouldShowRemindersExpanded ? 'Collapse reminders' : 'Expand reminders'}
+              aria-expanded={shouldShowRemindersExpanded}
             >
               <div className="flex items-center gap-2.5 flex-wrap">
                 <Bell className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -272,14 +286,14 @@ export function ActionCard({
                   {getTimeRangeLabel()}
                 </span>
               </div>
-              {isRemindersExpanded ? (
+              {shouldShowRemindersExpanded ? (
                 <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
               ) : (
                 <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
               )}
             </button>
 
-            {isRemindersExpanded && (
+            {shouldShowRemindersExpanded && (
               <div className="space-y-2">
                 {action.reminders.map((reminder, index) => {
                   const channelLabel = reminder.channel === 'PUSH' ? 'Push Notification' : 
@@ -313,6 +327,8 @@ export function ActionCard({
               </div>
             )}
           </div>
+        )}
+          </>
         )}
       </Card>
       </div>
