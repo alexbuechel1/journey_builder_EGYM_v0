@@ -124,7 +124,7 @@ export const ACTION_LIBRARY: Record<string, ActionLibraryItem> = {
   },
   A14: {
     id: 'A14',
-    title: 'Machine settings created',
+    title: 'EGYM Machine Setup done',
     eventType: 'MACHINE_SETTINGS_CREATED',
     completionMode: 'OCCURRENCE',
     supportedProducts: ['FITHUB', 'TRAINER_APP'],
@@ -168,7 +168,7 @@ export const ACTION_CATEGORIES: Record<string, ActionCategory> = {
   A01: 'Onboarding', // EGYM Account created
   A10: 'Onboarding', // RFID linked
   A11: 'Onboarding', // NFC created
-  A14: 'Onboarding', // Machine settings created
+  A14: 'Onboarding', // EGYM Machine Setup done
   A03: 'Assessments', // Strength test done
   A04: 'Assessments', // Flexibility test done
   A07: 'Assessments', // BioAge calculated
