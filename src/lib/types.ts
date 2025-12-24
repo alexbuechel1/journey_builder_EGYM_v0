@@ -1,6 +1,6 @@
 // Domain Types for Journey Builder
 
-export type Product = 'BMA' | 'FITHUB' | 'TRAINER_APP' | 'SMART_STRENGTH' | 'UNKNOWN';
+export type Product = 'BMA' | 'FITHUB' | 'TRAINER_APP' | 'SMART_STRENGTH' | 'MMS';
 export type CompletionMode = 'OCCURRENCE' | 'COUNTER';
 export type TimeRangeType = 'NONE' | 'ABSOLUTE' | 'WITH_PREVIOUS';
 export type TimeUnit = 'DAYS' | 'WEEKS' | 'MONTHS';

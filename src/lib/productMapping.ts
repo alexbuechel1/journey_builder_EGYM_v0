@@ -6,6 +6,7 @@ const smartStrengthIcon = "https://www.figma.com/api/mcp/asset/cda7135a-2391-462
 // Removed unused icons: smartFlexIcon, smartCardioIcon
 const memberAppIcon = "https://www.figma.com/api/mcp/asset/476a42b8-aab1-4790-a540-1680249e641e";
 const trainerAppIcon = "https://www.figma.com/api/mcp/asset/15a9e6a1-abf0-43e2-a243-da9bb0a407de";
+const egymSettingsIcon = "https://www.figma.com/api/mcp/asset/4e041138-296c-45df-b5f9-8cea64692b94";
 
 export interface ProductInfo {
   id: Product;
@@ -34,10 +35,10 @@ export const PRODUCT_INFO: Record<Product, ProductInfo> = {
     label: 'Smart Strength',
     icon: smartStrengthIcon,
   },
-  UNKNOWN: {
-    id: 'UNKNOWN',
-    label: 'Unknown',
-    icon: memberAppIcon, // Fallback icon
+  MMS: {
+    id: 'MMS',
+    label: 'MMS',
+    icon: egymSettingsIcon,
   },
 };
 
