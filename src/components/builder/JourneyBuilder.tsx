@@ -3,6 +3,7 @@ import { useJourney } from '@/contexts/JourneyContext';
 import { JourneySelector } from './JourneySelector';
 import { ActionList } from './ActionList';
 import { ActionForm } from './ActionForm';
+import { TimelineView } from './TimelineView';
 import { Button } from '@/components/ui/button';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { ToastContainer, useToast } from '@/components/ui/toast';
@@ -133,7 +134,7 @@ export function JourneyBuilder() {
       </div>
 
       {/* Action List - Always with dotted canvas background */}
-      <div className={`relative dotted-canvas bg-muted/30 rounded-lg -mx-6 px-6 py-6 pb-20 ${currentJourney.actions.length === 0 ? 'min-h-[calc(100vh-300px)]' : 'min-h-[calc(100vh-400px)]'}`}>
+      <div className={`relative dotted-canvas bg-muted/30 rounded-lg -mx-6 px-6 pt-6 pb-20 ${currentJourney.actions.length === 0 ? 'min-h-[calc(100vh-300px)]' : 'min-h-[calc(100vh-400px)]'}`}>
         {/* Controls - Fixed position, not affected by zoom */}
         <div className="absolute top-4 right-4 z-20 flex flex-col gap-1">
           {/* Zoom Controls */}
@@ -232,28 +233,52 @@ export function JourneyBuilder() {
           </div>
         ) : (
           <>
-            {/* Action list on dotted canvas */}
-            <ActionList
-              actions={currentJourney.actions}
-              onEdit={handleEditAction}
-              onDelete={handleDeleteClick}
-              onUpdate={handleUpdateAction}
-              expandState={expandState}
-            />
-            
-            {/* Floating Add Action Button - Zapier style */}
-            <div className="relative flex flex-col items-center">
-              {/* Connection line from last action */}
-              <div className={`w-0.5 bg-primary ${expandState === 'collapsed' ? 'h-1' : 'h-4'}`}></div>
+            {/* Main content area with timeline and action list - shared scroll */}
+            <div className="flex gap-6 overflow-y-auto max-h-[calc(100vh-300px)]">
+              {/* Vertical Timeline - Left side */}
+              <div className="w-56 flex-shrink-0">
+                <TimelineView
+                  actions={currentJourney.actions}
+                  onActionClick={(actionId) => {
+                    // Scroll to action card
+                    const element = document.getElementById(`action-${actionId}`);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      // Add a highlight effect
+                      element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+                      setTimeout(() => {
+                        element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+                      }, 2000);
+                    }
+                  }}
+                />
+              </div>
               
-              {/* Floating plus button */}
-              <button
-                onClick={handleAddAction}
-                className="relative z-10 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                aria-label="Add new action"
-              >
-                <Plus className="h-5 w-5" aria-hidden="true" />
-              </button>
+              {/* Action list on dotted canvas */}
+              <div className="flex-1 relative">
+                <ActionList
+                  actions={currentJourney.actions}
+                  onEdit={handleEditAction}
+                  onDelete={handleDeleteClick}
+                  onUpdate={handleUpdateAction}
+                  expandState={expandState}
+                />
+                
+                {/* Floating Add Action Button - Zapier style */}
+                <div className="relative flex flex-col items-center mt-4">
+                  {/* Connection line from last action */}
+                  <div className={`w-0.5 bg-primary ${expandState === 'collapsed' ? 'h-1' : 'h-4'}`}></div>
+                  
+                  {/* Floating plus button */}
+                  <button
+                    onClick={handleAddAction}
+                    className="relative z-10 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    aria-label="Add new action"
+                  >
+                    <Plus className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
             </div>
           </>
         )}

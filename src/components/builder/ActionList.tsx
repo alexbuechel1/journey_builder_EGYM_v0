@@ -180,7 +180,7 @@ export function ActionList({
         items={actions.map((a) => a.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="space-y-0">
+        <div className="space-y-0 pt-4">
           {groups.map((group, groupIdx) => {
             if (group.isGroup) {
               // Render grouped items with wrapper

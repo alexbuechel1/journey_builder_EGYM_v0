@@ -101,7 +101,7 @@ export function ActionCard({
 
   return (
     <TooltipProvider>
-      <div className="relative group">
+      <div id={`action-${action.id}`} className="relative group scroll-mt-4">
         <Card className="bg-white border border-border shadow-sm hover:shadow-md transition-all duration-200 overflow-visible">
         {/* Entry Event Badge - Positioned on top border */}
         {isEntryAction && (
