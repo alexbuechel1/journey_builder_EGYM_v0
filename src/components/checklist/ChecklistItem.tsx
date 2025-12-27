@@ -3,7 +3,7 @@ import type { Action } from '@/lib/types';
 import { getActionLibraryItem } from '@/lib/actionLibrary';
 import { getProductInfo } from '@/lib/productMapping';
 import { formatTimeFrame, formatProgress, calculateProgressPercentage, getActionStatus, calculateDeadline } from '@/lib/checklistUtils';
-import { ChevronDown, ChevronUp, CheckCircle2, Clock, AlertCircle, Circle } from 'lucide-react';
+import { ChevronDown, ChevronUp, CheckCircle2, Clock, AlertCircle, Circle, Check } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 interface ChecklistItemProps {
@@ -13,6 +13,7 @@ interface ChecklistItemProps {
   currentCount?: number;
   completedAt?: Date;
   currentTime?: Date;
+  stepNumber?: number;
 }
 
 export function ChecklistItem({
@@ -22,6 +23,7 @@ export function ChecklistItem({
   currentCount = 0,
   completedAt,
   currentTime = new Date(),
+  stepNumber,
 }: ChecklistItemProps) {
   const [isGuidanceExpanded, setIsGuidanceExpanded] = useState(false);
   
@@ -48,31 +50,31 @@ export function ChecklistItem({
     currentTime
   );
   
-  // Status styling
+  // Status styling - using design system semantic colors
   const getStatusConfig = () => {
     switch (status) {
       case 'DONE':
         return {
           icon: CheckCircle2,
-          color: 'text-green-600',
-          bgColor: 'bg-green-50',
-          borderColor: 'border-green-200',
+          color: 'text-success',
+          bgColor: 'bg-success/10',
+          borderColor: 'border-success/20',
           label: 'Done',
         };
       case 'IN_PROGRESS':
         return {
           icon: Clock,
-          color: 'text-amber-600',
-          bgColor: 'bg-amber-50',
-          borderColor: 'border-amber-200',
+          color: 'text-warning',
+          bgColor: 'bg-warning/10',
+          borderColor: 'border-warning/20',
           label: 'In Progress',
         };
       case 'OVERDUE':
         return {
           icon: AlertCircle,
-          color: 'text-red-600',
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
+          color: 'text-destructive',
+          bgColor: 'bg-destructive/10',
+          borderColor: 'border-destructive/20',
           label: 'Overdue',
         };
       default:
@@ -99,19 +101,25 @@ export function ChecklistItem({
     : '';
   
   return (
-    <Card className={`p-4 border ${statusConfig.borderColor} ${statusConfig.bgColor} transition-colors`}>
-      <div className="flex items-start gap-3">
-        {/* Status Icon */}
-        <div className={`flex-shrink-0 mt-0.5 ${statusConfig.color}`}>
-          <StatusIcon className="h-5 w-5" aria-hidden="true" />
-        </div>
+    <Card className={`p-12x border ${statusConfig.borderColor} ${statusConfig.bgColor} transition-colors card-shadow`}>
+      <div className="flex items-start gap-3" role="region" aria-labelledby={`action-title-${action.id}`}>
+        {/* Step Number Badge - Shows checkmark when done */}
+        {stepNumber !== undefined && (
+          <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground" aria-label={`Step ${stepNumber}, Status: ${statusConfig.label}`}>
+            {status === 'DONE' ? (
+              <Check className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <span className="text-body-50-bold font-bold">{stepNumber}</span>
+            )}
+          </div>
+        )}
         
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Header Row */}
           <div className="flex items-start justify-between gap-3 mb-2">
             <div className="flex-1 min-w-0">
-              <h3 className="text-body-100-medium font-medium text-foreground mb-1">
+              <h3 id={`action-title-${action.id}`} className="text-body-100-medium font-medium text-foreground mb-1">
                 {title}
               </h3>
               
@@ -130,8 +138,9 @@ export function ChecklistItem({
               </div>
             </div>
             
-            {/* Status Badge */}
-            <div className={`flex-shrink-0 px-2 py-1 rounded-md ${statusConfig.bgColor} border ${statusConfig.borderColor}`}>
+            {/* Status Badge with Icon */}
+            <div className={`flex-shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md ${statusConfig.bgColor} border ${statusConfig.borderColor}`} aria-label={`Status: ${statusConfig.label}`}>
+              <StatusIcon className={`h-4 w-4 ${statusConfig.color}`} aria-hidden="true" />
               <span className={`text-body-50-bold ${statusConfig.color}`}>
                 {statusConfig.label}
               </span>
@@ -153,9 +162,9 @@ export function ChecklistItem({
                 <div
                   className={`h-full transition-all duration-300 ${
                     status === 'DONE'
-                      ? 'bg-green-600'
+                      ? 'bg-success'
                       : status === 'OVERDUE'
-                      ? 'bg-red-600'
+                      ? 'bg-destructive'
                       : 'bg-primary'
                   }`}
                   style={{ width: `${progressPercentage}%` }}
@@ -163,6 +172,7 @@ export function ChecklistItem({
                   aria-valuenow={currentCount}
                   aria-valuemin={0}
                   aria-valuemax={action.requiredCount || 0}
+                  aria-label={`Progress: ${progressText}`}
                 />
               </div>
             </div>
@@ -185,9 +195,9 @@ export function ChecklistItem({
             <div className="mt-3 border-t border-border pt-3">
               <button
                 onClick={() => setIsGuidanceExpanded(!isGuidanceExpanded)}
-                className="flex items-center justify-between w-full text-left hover:opacity-80 transition-opacity"
+                className="flex items-center justify-between w-full text-left hover:opacity-80 transition-opacity min-h-[44px] min-w-[44px]"
                 aria-expanded={isGuidanceExpanded}
-                aria-label={isGuidanceExpanded ? 'Collapse guidance' : 'Expand guidance'}
+                aria-label={isGuidanceExpanded ? `Collapse guidance for ${title}` : `Expand guidance for ${title}`}
               >
                 <span className="text-body-50-bold text-foreground">
                   Guidance
