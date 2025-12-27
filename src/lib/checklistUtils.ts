@@ -72,7 +72,7 @@ export function formatTimeFrame(
   
   if (!deadline) {
     // WITH_PREVIOUS without previous completion
-    return 'Pending previous action';
+    return 'Complete previous step';
   }
   
   const daysDiff = differenceInDays(deadline, currentTime);

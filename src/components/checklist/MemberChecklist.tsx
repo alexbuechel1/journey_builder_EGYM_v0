@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import type { Journey } from '@/lib/types';
 import { ChecklistItem } from './ChecklistItem';
 import { getActionStatus, calculateDeadline } from '@/lib/checklistUtils';
@@ -26,36 +26,6 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
       return posA - posB;
     });
   }, [journey]);
-  
-  if (!journey) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-body-100 text-muted-foreground mb-2">
-            No journey selected
-          </p>
-          <p className="text-body-50 text-muted-foreground">
-            Please select a journey in the builder to view the checklist
-          </p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (visibleActions.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-body-100 text-muted-foreground mb-2">
-            No visible actions
-          </p>
-          <p className="text-body-50 text-muted-foreground">
-            This journey doesn't have any actions visible in the checklist
-          </p>
-        </div>
-      </div>
-    );
-  }
   
   // Calculate journey progress
   const journeyProgress = useMemo(() => {
@@ -91,11 +61,87 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
     return { completedCount, totalCount, percentage };
   }, [journey, visibleActions, entryCompletedAt, currentTime]);
   
+  // Keyboard navigation refs
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
+  // Reset refs array when visibleActions changes
+  useEffect(() => {
+    itemRefs.current = [];
+  }, [visibleActions.length]);
+  
+  // Keyboard navigation support
+  useEffect(() => {
+    if (visibleActions.length === 0) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle if focus is within checklist
+      const focusedElement = document.activeElement;
+      const isInChecklist = itemRefs.current.some(ref => ref?.contains(focusedElement));
+      
+      if (!isInChecklist) return;
+      
+      // Arrow keys to navigate between items
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const currentIndex = itemRefs.current.findIndex(ref => ref?.contains(focusedElement));
+        const nextIndex = Math.min(currentIndex + 1, itemRefs.current.length - 1);
+        itemRefs.current[nextIndex]?.focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const currentIndex = itemRefs.current.findIndex(ref => ref?.contains(focusedElement));
+        const nextIndex = Math.max(currentIndex - 1, 0);
+        itemRefs.current[nextIndex]?.focus();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [visibleActions.length]);
+  
+  // Early returns AFTER all hooks
+  if (!journey) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-body-100 text-muted-foreground mb-2">
+            No journey selected
+          </p>
+          <p className="text-body-50 text-muted-foreground">
+            Please select a journey in the builder to view the checklist
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (visibleActions.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-body-100 text-muted-foreground mb-2">
+            No visible actions
+          </p>
+          <p className="text-body-50 text-muted-foreground">
+            This journey doesn't have any actions visible in the checklist
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
   // Track previous action completion for WITH_PREVIOUS calculations
   let previousActionCompletedAt: Date | undefined = entryCompletedAt;
   
   return (
     <>
+      {/* Skip Link for Keyboard Navigation */}
+      <a
+        href="#checklist-start"
+        className="sr-only focus:static focus:w-auto focus:h-auto focus:p-4 focus:m-0 focus:overflow-visible focus:clip-auto focus:whitespace-normal focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
+      >
+        Skip to checklist
+      </a>
+      
       {/* Journey Progress Overview */}
       {visibleActions.length > 0 && (
         <div className="mb-12x p-12x bg-card rounded-lg border border-border card-shadow" role="region" aria-label="Journey progress">
@@ -120,7 +166,7 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
       )}
       
       {/* Checklist Items */}
-      <div className="space-y-12x" role="list" aria-label="Journey checklist">
+      <div id="checklist-start" className="space-y-12x" role="list" aria-label="Journey checklist">
         {visibleActions.map((action, index) => {
           // For read-only checklist, we don't have actual completion data
           // This will be enhanced when simulation is added
@@ -138,8 +184,18 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
             // This will be replaced with real data in Phase 4
           }
           
+          const isLast = index === visibleActions.length - 1;
+          
           return (
-            <div key={action.id} role="listitem">
+            <div
+              key={action.id}
+              role="listitem"
+              ref={(el) => {
+                itemRefs.current[index] = el;
+              }}
+              tabIndex={0}
+              className="focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:rounded-lg"
+            >
               <ChecklistItem
                 action={action}
                 entryCompletedAt={entryCompletedAt}
@@ -148,6 +204,8 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
                 completedAt={completedAt}
                 currentTime={currentTime}
                 stepNumber={index + 1}
+                isLast={isLast}
+                showConnector={true}
               />
             </div>
           );
