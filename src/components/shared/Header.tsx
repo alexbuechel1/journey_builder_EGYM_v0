@@ -1,5 +1,7 @@
-import { Smartphone, X } from 'lucide-react';
+import { Smartphone, X, ListChecks } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useJourney } from '@/contexts/JourneyContext';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Figma image assets
 const egymLogo = "https://www.figma.com/api/mcp/asset/78c42b99-f78f-4dc1-9ad9-93048bd98710";
@@ -13,6 +15,17 @@ interface HeaderProps {
 }
 
 export function Header({ isSimulatorOpen, onToggleSimulator }: HeaderProps) {
+  const { currentJourney } = useJourney();
+  
+  const handleViewChecklist = () => {
+    if (!currentJourney) return;
+    
+    const url = `/checklist?journeyId=${currentJourney.id}`;
+    window.open(url, '_blank');
+  };
+  
+  const isChecklistDisabled = !currentJourney;
+  
   return (
     <div className="bg-card border-b border-border h-[60px] flex items-center gap-[28px] px-[28px]">
       {/* EGYM Logo - Left Aligned */}
@@ -37,6 +50,31 @@ export function Header({ isSimulatorOpen, onToggleSimulator }: HeaderProps) {
 
       {/* Right Side Controls */}
       <div className="flex items-center gap-3 shrink-0">
+        {/* View Checklist Button */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleViewChecklist}
+                  disabled={isChecklistDisabled}
+                  className="gap-2"
+                >
+                  <ListChecks className="h-6 w-6" />
+                  <span className="hidden sm:inline">View Checklist</span>
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {isChecklistDisabled && (
+              <TooltipContent>
+                <p>Please select a journey to view the checklist</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+        
         {/* Simulator Toggle Button */}
         <Button
           variant={isSimulatorOpen ? "default" : "outline"}
