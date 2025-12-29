@@ -7,8 +7,9 @@ import { TimelineView } from './TimelineView';
 import { Button } from '@/components/ui/button';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { ToastContainer, useToast } from '@/components/ui/toast';
-import { X, Zap, Plus, ZoomIn, ZoomOut, Minus, Maximize2, Maximize } from 'lucide-react';
+import { X, Zap, Plus, ZoomIn, ZoomOut, Minus, Maximize2, Maximize, Clock } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import type { Action } from '@/lib/types';
 import { getActionLibraryItem } from '@/lib/actionLibrary';
 
@@ -21,6 +22,7 @@ export function JourneyBuilder() {
   const [zoomLevel, setZoomLevel] = useState(1);
   type ExpandState = 'collapsed' | 'expanded' | 'fully-expanded';
   const [expandState, setExpandState] = useState<ExpandState>('expanded');
+  const [showTimeline, setShowTimeline] = useState(true);
   const { toasts, showToast, dismissToast } = useToast();
 
   const handleZoomIn = () => {
@@ -201,6 +203,21 @@ export function JourneyBuilder() {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Timeline Toggle */}
+          <div className="bg-white border border-border rounded-md shadow-sm p-1.5">
+            <div className="flex items-center justify-between gap-2 px-1 min-w-[120px]">
+              <div className="flex items-center gap-2">
+                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Timeline</span>
+              </div>
+              <Switch
+                checked={showTimeline}
+                onChange={(e) => setShowTimeline(e.target.checked)}
+                aria-label="Toggle timeline visibility"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Content container with zoom - only actions scale, canvas stays full screen */}
@@ -236,23 +253,25 @@ export function JourneyBuilder() {
             {/* Main content area with timeline and action list - shared scroll */}
             <div className="flex gap-6 overflow-y-auto max-h-[calc(100vh-300px)]">
               {/* Vertical Timeline - Left side */}
-              <div className="w-56 flex-shrink-0">
-                <TimelineView
-                  actions={currentJourney.actions}
-                  onActionClick={(actionId) => {
-                    // Scroll to action card
-                    const element = document.getElementById(`action-${actionId}`);
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      // Add a highlight effect
-                      element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
-                      setTimeout(() => {
-                        element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
-                      }, 2000);
-                    }
-                  }}
-                />
-              </div>
+              {showTimeline && (
+                <div className="w-56 flex-shrink-0">
+                  <TimelineView
+                    actions={currentJourney.actions}
+                    onActionClick={(actionId) => {
+                      // Scroll to action card
+                      const element = document.getElementById(`action-${actionId}`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Add a highlight effect
+                        element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+                        setTimeout(() => {
+                          element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+                        }, 2000);
+                      }
+                    }}
+                  />
+                </div>
+              )}
               
               {/* Action list on dotted canvas */}
               <div className="flex-1 relative">
