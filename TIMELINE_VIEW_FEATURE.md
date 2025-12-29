@@ -213,3 +213,6 @@ TimelineView renders markers + action positions
 - Standard gym journey timeline: 3 months (90 days)
 - Time marker system: Adaptive based on action deadlines
 
+
+
+

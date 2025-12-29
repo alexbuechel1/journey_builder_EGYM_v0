@@ -2,6 +2,7 @@ import { useMemo, useEffect, useRef } from 'react';
 import type { Journey } from '@/lib/types';
 import { ChecklistItem } from './ChecklistItem';
 import { getActionStatus, calculateDeadline } from '@/lib/checklistUtils';
+import { useSimulator } from '@/contexts/SimulatorContext';
 
 interface MemberChecklistProps {
   journey: Journey | null;
@@ -9,7 +10,12 @@ interface MemberChecklistProps {
   currentTime?: Date;
 }
 
-export function MemberChecklist({ journey, entryCompletedAt, currentTime = new Date() }: MemberChecklistProps) {
+export function MemberChecklist({ journey, entryCompletedAt: propEntryCompletedAt, currentTime: propCurrentTime }: MemberChecklistProps) {
+  const { actionInstances, entryActionCompletedAt: simulatorEntryCompletedAt, simulatedTime } = useSimulator();
+  
+  // Use simulator data if available, otherwise fall back to props
+  const entryCompletedAt = simulatorEntryCompletedAt ?? propEntryCompletedAt;
+  const currentTime = propCurrentTime ?? simulatedTime;
   // Filter and sort visible actions
   const visibleActions = useMemo(() => {
     if (!journey) return [];
@@ -27,6 +33,15 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
     });
   }, [journey]);
   
+  // Create a map of action instances by action ID for quick lookup
+  const actionInstancesMap = useMemo(() => {
+    const map = new Map<string, typeof actionInstances[0]>();
+    actionInstances.forEach((instance) => {
+      map.set(instance.id, instance);
+    });
+    return map;
+  }, [actionInstances]);
+
   // Calculate journey progress
   const journeyProgress = useMemo(() => {
     if (!journey || visibleActions.length === 0) {
@@ -34,19 +49,17 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
     }
     
     let completedCount = 0;
-    let previousActionCompletedAt: Date | undefined = entryCompletedAt;
     
     visibleActions.forEach((action) => {
-      const deadline = calculateDeadline(
+      const instance = actionInstancesMap.get(action.id);
+      const deadline = instance?.deadline ?? calculateDeadline(
         action,
         entryCompletedAt || new Date(),
-        previousActionCompletedAt
+        undefined
       );
       
-      // For read-only checklist, we don't have actual completion data
-      // This will be enhanced when simulation is added
-      const completedAt = undefined;
-      const currentCount = 0;
+      const completedAt = instance?.completedAt;
+      const currentCount = instance?.currentCount ?? 0;
       
       const status = getActionStatus(action, deadline, currentTime, completedAt, currentCount);
       
@@ -59,7 +72,7 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
     const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
     
     return { completedCount, totalCount, percentage };
-  }, [journey, visibleActions, entryCompletedAt, currentTime]);
+  }, [journey, visibleActions, entryCompletedAt, currentTime, actionInstancesMap]);
   
   // Keyboard navigation refs
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -129,9 +142,6 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
     );
   }
   
-  // Track previous action completion for WITH_PREVIOUS calculations
-  let previousActionCompletedAt: Date | undefined = entryCompletedAt;
-  
   return (
     <>
       {/* Skip Link for Keyboard Navigation */}
@@ -168,20 +178,21 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
       {/* Checklist Items */}
       <div id="checklist-start" className="space-y-12x" role="list" aria-label="Journey checklist">
         {visibleActions.map((action, index) => {
-          // For read-only checklist, we don't have actual completion data
-          // This will be enhanced when simulation is added
-          const completedAt = undefined;
-          const currentCount = 0;
+          // Get action instance data if available
+          const instance = actionInstancesMap.get(action.id);
+          const completedAt = instance?.completedAt;
+          const currentCount = instance?.currentCount ?? 0;
           
-          // Calculate previous action completion
-          // In a real scenario, this would come from event data
-          const prevCompletedAt = previousActionCompletedAt;
-          
-          // After rendering, update previous for next iteration
-          // (In real implementation, this would be based on actual completion)
-          if (index > 0 && prevCompletedAt) {
-            // For demo purposes, assume actions complete sequentially
-            // This will be replaced with real data in Phase 4
+          // Calculate previous action completion for WITH_PREVIOUS calculations
+          // Find the most recent completed action before this one
+          let previousActionCompletedAt: Date | undefined = entryCompletedAt;
+          for (let i = index - 1; i >= 0; i--) {
+            const prevAction = visibleActions[i];
+            const prevInstance = actionInstancesMap.get(prevAction.id);
+            if (prevInstance?.completedAt) {
+              previousActionCompletedAt = prevInstance.completedAt;
+              break;
+            }
           }
           
           const isLast = index === visibleActions.length - 1;
@@ -199,7 +210,7 @@ export function MemberChecklist({ journey, entryCompletedAt, currentTime = new D
               <ChecklistItem
                 action={action}
                 entryCompletedAt={entryCompletedAt}
-                previousActionCompletedAt={prevCompletedAt}
+                previousActionCompletedAt={previousActionCompletedAt}
                 currentCount={currentCount}
                 completedAt={completedAt}
                 currentTime={currentTime}

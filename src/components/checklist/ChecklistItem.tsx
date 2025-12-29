@@ -3,6 +3,7 @@ import type { Action } from '@/lib/types';
 import { getActionLibraryItem } from '@/lib/actionLibrary';
 import { getProductInfo } from '@/lib/productMapping';
 import { formatTimeFrame, formatProgress, calculateProgressPercentage, getActionStatus, calculateDeadline } from '@/lib/checklistUtils';
+import { format } from 'date-fns';
 import { CheckCircle2, Clock, AlertCircle, Circle, Check, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -65,7 +66,7 @@ export function ChecklistItem({
           bgColor: 'bg-primary',
           label: 'Done!',
           showCTA: false,
-          showLabel: true,
+          showLabel: false, // Don't show "Done!" label
         };
       case 'IN_PROGRESS':
         return {
@@ -154,15 +155,22 @@ export function ChecklistItem({
                 {title}
               </h3>
               
-              {/* Time info inline badge with headline */}
-              {action.timeRange.type !== 'NONE' && deadline && (
+              {/* Time info inline badge - show completion date when done, deadline when not done */}
+              {status === 'DONE' && completedAt ? (
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/10">
+                  <Calendar className="h-3 w-3 text-success" aria-hidden="true" />
+                  <span className="text-body-50 text-success">
+                    Completed {format(completedAt, 'MMM d, yyyy')}
+                  </span>
+                </div>
+              ) : action.timeRange.type !== 'NONE' && deadline ? (
                 <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-wellpass/5">
                   <Calendar className="h-3 w-3 text-wellpass opacity-80" aria-hidden="true" />
                   <span className="text-body-50 text-wellpass opacity-80">
                     {timeFrameText}
                   </span>
                 </div>
-              )}
+              ) : null}
             </div>
             
             {/* Description/Subheadline */}

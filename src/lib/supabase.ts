@@ -16,3 +16,6 @@ export function isSupabaseConfigured(): boolean {
   return supabase !== null;
 }
 
+
+
+

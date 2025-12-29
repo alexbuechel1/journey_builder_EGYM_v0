@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { JourneyProvider, useJourney } from '@/contexts/JourneyContext';
+import { SimulatorProvider } from '@/contexts/SimulatorContext';
 import { MemberChecklist } from '@/components/checklist/MemberChecklist';
+import { EventSimulatorPanel } from '@/components/checklist/EventSimulatorPanel';
+import { Button } from '@/components/ui/button';
+import { Play, X } from 'lucide-react';
 import type { Journey } from '@/lib/types';
 
 function ChecklistContent() {
@@ -9,6 +13,7 @@ function ChecklistContent() {
   const { journeys, setCurrentJourney, loadJourneys } = useJourney();
   const [isLoading, setIsLoading] = useState(true);
   const [journey, setJourney] = useState<Journey | null>(null);
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   
   useEffect(() => {
     const loadChecklistJourney = async () => {
@@ -76,14 +81,48 @@ function ChecklistContent() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-card border-b border-border px-4 py-4 md:px-6">
-        <h1 className="text-body-100-medium font-medium text-foreground">
-          {journey?.name || 'Checklist'}
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-body-100-medium font-medium text-foreground">
+            {journey?.name || 'Checklist'}
+          </h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsSimulatorOpen(!isSimulatorOpen)}
+            className="gap-2"
+          >
+            {isSimulatorOpen ? (
+              <>
+                <X className="h-4 w-4" />
+                <span className="hidden sm:inline">Close Simulator</span>
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                <span className="hidden sm:inline">Open Simulator</span>
+              </>
+            )}
+          </Button>
+        </div>
       </div>
       
       {/* Content */}
-      <div className="container mx-auto px-4 py-6 md:px-6 max-w-4xl">
-        <MemberChecklist journey={journey} />
+      <div className="container mx-auto px-4 py-6 md:px-6">
+        <div className={`flex gap-6 ${isSimulatorOpen ? 'flex-row' : 'flex-col'} max-w-7xl`}>
+          {/* Checklist - Takes 2/3 when simulator is open, full width when closed */}
+          <div className={isSimulatorOpen ? 'flex-[2]' : 'w-full'}>
+            <MemberChecklist journey={journey} />
+          </div>
+          
+          {/* Event Simulator Panel - Only shown when open, takes 1/3, right-aligned */}
+          {isSimulatorOpen && (
+            <div className="flex-[1] flex justify-end">
+              <div className="w-full max-w-md sticky top-6">
+                <EventSimulatorPanel />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -92,7 +131,9 @@ function ChecklistContent() {
 export function ChecklistPage() {
   return (
     <JourneyProvider>
-      <ChecklistContent />
+      <SimulatorProvider>
+        <ChecklistContent />
+      </SimulatorProvider>
     </JourneyProvider>
   );
 }

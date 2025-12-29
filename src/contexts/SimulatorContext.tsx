@@ -18,6 +18,7 @@ interface SimulatorContextValue {
   entryActionCompletedAt?: Date;
   setEntryActionCompletedAt: (date: Date | undefined) => void;
   markNotificationRead: (notificationId: string) => void;
+  resetSimulation: () => void;
 }
 
 const SimulatorContext = createContext<SimulatorContextValue | undefined>(undefined);
@@ -45,11 +46,14 @@ export function SimulatorProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Convert actions to action instances (only when journey changes)
+    // Calculate deadlines using entryActionCompletedAt if available, otherwise use current simulated time
+    // This ensures deadlines are always shown, even when journey hasn't started
+    const deadlineBase = entryActionCompletedAt || simulatedTime;
     const instances: ActionInstance[] = currentJourney.actions.map((action) => {
-      const deadline = entryActionCompletedAt
+      const deadline = action.timeRange.type !== 'NONE'
         ? calculateDeadline(
             action,
-            entryActionCompletedAt,
+            deadlineBase,
             undefined // Previous action completion will be calculated when actions complete
           ) ?? undefined
         : undefined;
@@ -64,7 +68,10 @@ export function SimulatorProvider({ children }: { children: React.ReactNode }) {
     });
 
     setActionInstances(instances);
-  }, [currentJourney?.id]); // Only reinitialize when journey ID changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentJourney?.id, entryActionCompletedAt]); // Reinitialize when journey or entry completion changes
+  // Note: simulatedTime is used in calculation but not in deps to avoid excessive recalculations
+  // The time update effect handles deadline updates when time changes
 
   // Update deadlines when entry action completion time changes
   useEffect(() => {
@@ -91,11 +98,13 @@ export function SimulatorProvider({ children }: { children: React.ReactNode }) {
     if (!currentJourney || actionInstances.length === 0) return;
 
     const updatedInstances = actionInstances.map((instance) => {
-      // Recalculate deadline if entry action completed
-      const deadline = entryActionCompletedAt
+      // Recalculate deadline - use entryActionCompletedAt if available, otherwise use current time
+      // This ensures deadlines are always shown, even when journey hasn't started
+      const deadlineBase = entryActionCompletedAt || simulatedTime;
+      const deadline = instance.timeRange.type !== 'NONE'
         ? calculateDeadline(
             instance,
-            entryActionCompletedAt,
+            deadlineBase,
             undefined // TODO: Calculate previous action completion time
           ) ?? undefined
         : undefined;
@@ -211,6 +220,48 @@ export function SimulatorProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
+  const resetSimulation = useCallback(() => {
+    if (!currentJourney) return;
+
+    const now = new Date();
+
+    // Reset simulated time to now
+    setSimulatedTimeState(now);
+
+    // Clear all events
+    setEvents([]);
+
+    // Clear notifications
+    setNotifications([]);
+
+    // Clear entry action completion time
+    setEntryActionCompletedAtState(undefined);
+
+    // Clear reminder times
+    lastReminderTimesRef.current.clear();
+
+    // Reset action instances to initial state with deadlines recalculated
+    // Use current time as base for deadline calculations (as if journey would start now)
+    const instances: ActionInstance[] = currentJourney.actions.map((action) => {
+      // Calculate deadline using current time as entry point (for display purposes)
+      // This ensures deadlines are shown even when journey hasn't started
+      const deadline = action.timeRange.type !== 'NONE'
+        ? calculateDeadline(action, now, undefined) ?? undefined
+        : undefined;
+
+      return {
+        ...action,
+        status: 'NOT_DONE',
+        currentCount: 0,
+        deadline,
+        completedAt: undefined,
+        entryActionCompletedAt: undefined,
+      };
+    });
+
+    setActionInstances(instances);
+  }, [currentJourney]);
+
   return (
     <SimulatorContext.Provider
       value={{
@@ -225,6 +276,7 @@ export function SimulatorProvider({ children }: { children: React.ReactNode }) {
         entryActionCompletedAt,
         setEntryActionCompletedAt,
         markNotificationRead,
+        resetSimulation,
       }}
     >
       {children}
