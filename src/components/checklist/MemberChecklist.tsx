@@ -152,6 +152,18 @@ export function MemberChecklist({ journey, entryCompletedAt: propEntryCompletedA
         Skip to checklist
       </a>
       
+      {/* Motivational Header Greeting */}
+      {visibleActions.length > 0 && (
+        <div className="mb-8 text-center">
+          <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">
+            Welcome John 👋
+          </h2>
+          <p className="text-body-100 text-muted-foreground">
+            Complete these easy steps for your best training experience
+          </p>
+        </div>
+      )}
+      
       {/* Journey Progress Overview */}
       {visibleActions.length > 0 && (
         <div className="mb-12x p-12x bg-card rounded-lg border border-border card-shadow" role="region" aria-label="Journey progress">

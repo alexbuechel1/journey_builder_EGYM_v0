@@ -220,18 +220,16 @@ export function JourneyBuilder() {
           </div>
         </div>
 
-        {/* Content container with zoom - only actions scale, canvas stays full screen */}
-        <div 
-          className="relative transition-transform duration-200"
-          style={{ 
-            transform: `scale(${zoomLevel})`,
-            transformOrigin: 'top center',
-          }}
-        >
+        {/* Empty state - positioned relative to parent, not affected by zoom */}
         {currentJourney.actions.length === 0 ? (
-          /* Empty state - centered card */
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="bg-[#f5f5f0] border-2 border-dashed border-primary rounded-lg p-6 shadow-lg min-w-[320px]">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div 
+              className="bg-[#f5f5f0] border-2 border-dashed border-primary rounded-lg p-6 shadow-lg min-w-[320px] transition-transform duration-200"
+              style={{ 
+                transform: `scale(${zoomLevel})`,
+                transformOrigin: 'center',
+              }}
+            >
               {/* Action button inside card - top left */}
               <button
                 onClick={handleAddAction}
@@ -249,59 +247,67 @@ export function JourneyBuilder() {
             </div>
           </div>
         ) : (
-          <>
-            {/* Main content area with timeline and action list - shared scroll */}
-            <div className="flex gap-6 overflow-y-auto max-h-[calc(100vh-300px)]">
-              {/* Vertical Timeline - Left side */}
-              {showTimeline && (
-                <div className="w-56 flex-shrink-0">
-                  <TimelineView
-                    actions={currentJourney.actions}
-                    onActionClick={(actionId) => {
-                      // Scroll to action card
-                      const element = document.getElementById(`action-${actionId}`);
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        // Add a highlight effect
-                        element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
-                        setTimeout(() => {
-                          element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
-                        }, 2000);
-                      }
-                    }}
-                  />
-                </div>
-              )}
-              
-              {/* Action list on dotted canvas */}
-              <div className="flex-1 relative">
-                <ActionList
-                  actions={currentJourney.actions}
-                  onEdit={handleEditAction}
-                  onDelete={handleDeleteClick}
-                  onUpdate={handleUpdateAction}
-                  expandState={expandState}
-                />
+          /* Content container with zoom - only actions scale, canvas stays full screen */
+          <div 
+            className="relative transition-transform duration-200 w-full"
+            style={{ 
+              transform: `scale(${zoomLevel})`,
+              transformOrigin: 'top center',
+            }}
+          >
+            <>
+              {/* Main content area with timeline and action list - shared scroll */}
+              <div className="flex gap-6 overflow-y-auto max-h-[calc(100vh-300px)]">
+                {/* Vertical Timeline - Left side */}
+                {showTimeline && (
+                  <div className="w-56 flex-shrink-0">
+                    <TimelineView
+                      actions={currentJourney.actions}
+                      onActionClick={(actionId) => {
+                        // Scroll to action card
+                        const element = document.getElementById(`action-${actionId}`);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          // Add a highlight effect
+                          element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+                          setTimeout(() => {
+                            element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+                          }, 2000);
+                        }
+                      }}
+                    />
+                  </div>
+                )}
                 
-                {/* Floating Add Action Button - Zapier style */}
-                <div className="relative flex flex-col items-center mt-4">
-                  {/* Connection line from last action */}
-                  <div className={`w-0.5 bg-primary ${expandState === 'collapsed' ? 'h-1' : 'h-4'}`}></div>
+                {/* Action list on dotted canvas */}
+                <div className="flex-1 relative">
+                  <ActionList
+                    actions={currentJourney.actions}
+                    onEdit={handleEditAction}
+                    onDelete={handleDeleteClick}
+                    onUpdate={handleUpdateAction}
+                    expandState={expandState}
+                  />
                   
-                  {/* Floating plus button */}
-                  <button
-                    onClick={handleAddAction}
-                    className="relative z-10 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                    aria-label="Add new action"
-                  >
-                    <Plus className="h-5 w-5" aria-hidden="true" />
-                  </button>
+                  {/* Floating Add Action Button - Zapier style */}
+                  <div className="relative flex flex-col items-center mt-4">
+                    {/* Connection line from last action */}
+                    <div className={`w-0.5 bg-primary ${expandState === 'collapsed' ? 'h-1' : 'h-4'}`}></div>
+                    
+                    {/* Floating plus button */}
+                    <button
+                      onClick={handleAddAction}
+                      className="relative z-10 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                      aria-label="Add new action"
+                    >
+                      <Plus className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </>
+            </>
+          </div>
         )}
-        </div>
       </div>
 
       {/* Action Form Dialog */}
