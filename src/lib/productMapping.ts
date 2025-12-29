@@ -40,6 +40,11 @@ export const PRODUCT_INFO: Record<Product, ProductInfo> = {
     label: 'MMS',
     icon: egymSettingsIcon,
   },
+  UNKNOWN: {
+    id: 'UNKNOWN',
+    label: 'Unknown',
+    icon: egymSettingsIcon,
+  },
 };
 
 export function getProductInfo(product: Product): ProductInfo {
