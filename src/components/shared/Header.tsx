@@ -1,4 +1,4 @@
-import { Smartphone, X, ListChecks } from 'lucide-react';
+import { ListChecks } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useJourney } from '@/contexts/JourneyContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -10,11 +10,11 @@ const chevronDown = "https://www.figma.com/api/mcp/asset/9b208332-cae9-4fe8-a55b
 const userAvatar = "https://www.figma.com/api/mcp/asset/a6fdd0aa-c530-4c96-bcd9-ed97f5730cfa";
 
 interface HeaderProps {
-  isSimulatorOpen: boolean;
-  onToggleSimulator: () => void;
+  isSimulatorOpen?: boolean;
+  onToggleSimulator?: () => void;
 }
 
-export function Header({ isSimulatorOpen, onToggleSimulator }: HeaderProps) {
+export function Header({}: HeaderProps = {}) {
   const { currentJourney } = useJourney();
   
   const handleViewChecklist = () => {
@@ -74,27 +74,6 @@ export function Header({ isSimulatorOpen, onToggleSimulator }: HeaderProps) {
             )}
           </Tooltip>
         </TooltipProvider>
-        
-        {/* Simulator Toggle Button */}
-        <Button
-          variant={isSimulatorOpen ? "default" : "outline"}
-          size="sm"
-          onClick={onToggleSimulator}
-          className="gap-2"
-          title={isSimulatorOpen ? "Close Simulator" : "Open Simulator"}
-        >
-          {isSimulatorOpen ? (
-            <>
-              <X className="h-6 w-6" />
-              <span className="hidden sm:inline">Close Simulator</span>
-            </>
-          ) : (
-            <>
-              <Smartphone className="h-6 w-6" />
-              <span className="hidden sm:inline">Open Simulator</span>
-            </>
-          )}
-        </Button>
 
         {/* User Profile */}
         <div className="flex items-center gap-2">
