@@ -40,22 +40,8 @@ export function isInGroup(actions: Action[], currentIndex: number): boolean {
   if (currentIndex === 0) return false;
   
   const current = actions[currentIndex];
-  const previous = actions[currentIndex - 1];
-  
-  // Check if current has its own absolute timeline
-  const currentHasOwnTimeline = current.timeRange.type === 'ABSOLUTE' || 
-                                (current.timeRange.type === 'WITH_PREVIOUS' && 
-                                 current.timeRange.offsetDays !== undefined && 
-                                 current.timeRange.offsetDays > 0);
-  
-  // Check if previous has its own timeline
-  const previousHasOwnTimeline = previous.timeRange.type === 'ABSOLUTE' || 
-                                  (previous.timeRange.type === 'WITH_PREVIOUS' && 
-                                   previous.timeRange.offsetDays !== undefined && 
-                                   previous.timeRange.offsetDays > 0);
   
   const isCurrentImmediate = isImmediateSequence(current.timeRange);
-  const isPreviousImmediate = isImmediateSequence(previous.timeRange);
   const isNextImmediate = currentIndex < actions.length - 1 && 
                           isImmediateSequence(actions[currentIndex + 1].timeRange);
   
