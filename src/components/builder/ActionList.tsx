@@ -134,21 +134,63 @@ export function ActionList({
     actions.forEach((action, index) => {
       const inGroup = isInGroup(actions, index);
       
+      // Check if current has absolute timeline and previous is in a group
+      // This breaks the group chain (actions with absolute timeline never group backwards)
+      const currentHasOwnTimeline = action.timeRange.type === 'ABSOLUTE' || 
+                                    (action.timeRange.type === 'WITH_PREVIOUS' && 
+                                     action.timeRange.offsetDays !== undefined && 
+                                     action.timeRange.offsetDays > 0);
+      const previousInGroup = index > 0 && isInGroup(actions, index - 1);
+      const shouldBreakGroup = currentHasOwnTimeline && previousInGroup;
+      
       if (inGroup && !currentIsGroup) {
+        // Check if current has "With previous" and previous is not in a group
+        // If so, we'll include previous in the new group, so don't push it as a non-group
+        const isCurrentImmediate = action.timeRange.type === 'WITH_PREVIOUS' && 
+                                   (!action.timeRange.offsetDays || action.timeRange.offsetDays === 0);
+        const previousNotInGroup = index > 0 && !isInGroup(actions, index - 1);
+        const shouldIncludePrevious = isCurrentImmediate && previousNotInGroup && index > 0;
+        
         // Start new group
         if (currentGroup) {
-          groups.push({ items: currentGroup, isGroup: false });
+          // If we're about to include the previous action in the new group,
+          // remove it from currentGroup before pushing (to avoid duplication)
+          if (shouldIncludePrevious && currentGroup.length > 0) {
+            const lastItem = currentGroup[currentGroup.length - 1];
+            if (lastItem.index === index - 1) {
+              // Remove the previous action from currentGroup
+              currentGroup = currentGroup.slice(0, -1);
+            }
+          }
+          // Only push currentGroup if it's not empty
+          if (currentGroup.length > 0) {
+            groups.push({ items: currentGroup, isGroup: false });
+          }
         }
-        currentGroup = [{ action, index }];
+        
+        if (shouldIncludePrevious) {
+          // Include previous action in the group
+          currentGroup = [
+            { action: actions[index - 1], index: index - 1 },
+            { action, index }
+          ];
+        } else {
+          currentGroup = [{ action, index }];
+        }
         currentIsGroup = true;
-      } else if (inGroup && currentIsGroup) {
-        // Continue group
+      } else if (inGroup && currentIsGroup && !shouldBreakGroup) {
+        // Continue group (only if we shouldn't break it)
         currentGroup!.push({ action, index });
-      } else if (!inGroup && currentIsGroup) {
-        // End group
-        groups.push({ items: currentGroup!, isGroup: true });
+      } else if (shouldBreakGroup || (!inGroup && currentIsGroup)) {
+        // End group (either because current doesn't belong, or because we need to break the chain)
+        if (currentIsGroup && currentGroup) {
+          groups.push({ items: currentGroup, isGroup: true });
+        }
+        // Start new group or non-group
+        // If shouldBreakGroup but inGroup is true, we still start a new group
+        // (action with absolute timeline can group forwards, just not backwards)
         currentGroup = [{ action, index }];
-        currentIsGroup = false;
+        currentIsGroup = inGroup; // Don't use !shouldBreakGroup here - if inGroup is true, start a group
       } else {
         // Continue non-group
         if (!currentGroup) {

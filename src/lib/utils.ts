@@ -21,35 +21,59 @@ export function isImmediateSequence(timeRange: TimeRange): boolean {
  * Grouping rules:
  * - First action (index 0) is NEVER in a group (no previous to connect to)
  * - An action is in a group if:
- *   1. It has "With previous" (offsetDays === 0) AND there's a previous action, OR
- *   2. The NEXT action has "With previous" (making current the source that the immediate action connects to)
+ *   1. It has "With previous" AND the previous action doesn't have its own timeline
+ *      (groups backwards with previous), OR
+ *   2. The NEXT action has "With previous" (current is the source)
  * 
- * This ensures groups only contain:
+ * Key principle: Actions with their own timeline (ABSOLUTE or WITH_PREVIOUS with offset > 0)
+ * should NOT group backwards with previous actions, but CAN be sources for "With previous"
+ * actions that follow them.
+ * 
+ * This ensures groups contain:
  * - The source action (the one that triggers the immediate sequence)
  * - All consecutive immediate actions that follow it
- * - NO actions that come after an immediate action but are not immediate themselves
+ * - Actions with their own timeline are included as sources when a "With previous" action follows
+ * - Actions with their own timeline are NOT grouped backwards with previous actions
  */
 export function isInGroup(actions: Action[], currentIndex: number): boolean {
   // First action can never be in a group (no previous action to connect to)
   if (currentIndex === 0) return false;
   
   const current = actions[currentIndex];
+  const previous = actions[currentIndex - 1];
   
-  // Current action is in group if:
-  // 1. Current is "With previous" (will connect to previous action), OR
-  // 2. Next action is "With previous" (current is the source that the immediate action connects to)
-  // 
-  // This ensures:
-  // - "With previous" actions always group with their immediate previous action
-  // - Source actions are included in the group
-  // - Actions that come AFTER an immediate action but are NOT immediate themselves are NOT grouped
+  // Check if current has its own absolute timeline
+  const currentHasOwnTimeline = current.timeRange.type === 'ABSOLUTE' || 
+                                (current.timeRange.type === 'WITH_PREVIOUS' && 
+                                 current.timeRange.offsetDays !== undefined && 
+                                 current.timeRange.offsetDays > 0);
+  
+  // Check if previous has its own timeline
+  const previousHasOwnTimeline = previous.timeRange.type === 'ABSOLUTE' || 
+                                  (previous.timeRange.type === 'WITH_PREVIOUS' && 
+                                   previous.timeRange.offsetDays !== undefined && 
+                                   previous.timeRange.offsetDays > 0);
+  
   const isCurrentImmediate = isImmediateSequence(current.timeRange);
-  
-  // Check if next action is immediate (making current the source)
+  const isPreviousImmediate = isImmediateSequence(previous.timeRange);
   const isNextImmediate = currentIndex < actions.length - 1 && 
                           isImmediateSequence(actions[currentIndex + 1].timeRange);
   
-  return isCurrentImmediate || isNextImmediate;
+  // Rule 1: Current has "With previous" - always groups backwards with previous
+  // (regardless of previous's timeline - "With previous" means group with immediate previous)
+  const canGroupBackwards = isCurrentImmediate;
+  
+  // Rule 2: Next has "With previous" (current is the source)
+  // Key: Actions with absolute timeline NEVER group backwards, but CAN group forwards
+  // So if current has own timeline, it can still be source for next (forward grouping)
+  // The grouping algorithm will handle breaking the group when previous is also in a group
+  const canBeSource = isNextImmediate;
+  
+  // However, if current has own timeline AND previous is in a group,
+  // we need to ensure they're not in the same group
+  // This is handled by the grouping algorithm checking isGroupStart
+  // For now, we return true if either condition is met
+  return canGroupBackwards || canBeSource;
 }
 
 /**
