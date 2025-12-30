@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { JourneyProvider, useJourney } from '@/contexts/JourneyContext';
 import { SimulatorProvider } from '@/contexts/SimulatorContext';
 import { MemberChecklist } from '@/components/checklist/MemberChecklist';
 import { EventSimulatorPanel } from '@/components/checklist/EventSimulatorPanel';
 import { Button } from '@/components/ui/button';
-import { Play, X } from 'lucide-react';
+import { Play, X, ArrowLeft } from 'lucide-react';
 import type { Journey } from '@/lib/types';
 
 function ChecklistContent() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { journeys, setCurrentJourney, loadJourneys } = useJourney();
   const [isLoading, setIsLoading] = useState(true);
   const [journey, setJourney] = useState<Journey | null>(null);
@@ -82,9 +83,20 @@ function ChecklistContent() {
       {/* Header */}
       <div className="bg-card border-b border-border px-4 py-4 md:px-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-body-100-medium font-medium text-foreground">
-            {journey?.name || 'Checklist'}
-          </h1>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Back to Builder</span>
+            </Button>
+            <h1 className="text-body-100-medium font-medium text-foreground">
+              {journey?.name || 'Checklist'}
+            </h1>
+          </div>
           <Button
             variant="outline"
             size="sm"

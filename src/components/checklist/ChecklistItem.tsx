@@ -3,6 +3,7 @@ import type { Action } from '@/lib/types';
 import { getActionLibraryItem } from '@/lib/actionLibrary';
 import { getProductInfo } from '@/lib/productMapping';
 import { formatTimeFrame, formatProgress, calculateProgressPercentage, getActionStatus, calculateDeadline } from '@/lib/checklistUtils';
+import { renderGuidanceContent } from '@/lib/guidanceContent';
 import { format } from 'date-fns';
 import { CheckCircle2, Clock, AlertCircle, Circle, Check, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -111,11 +112,25 @@ export function ChecklistItem({
   
   return (
     <div className="relative flex items-start gap-4" role="region" aria-labelledby={`action-title-${action.id}`}>
-      {/* Step Number Badge with Connector */}
-      <div className="flex flex-col items-center flex-shrink-0">
+      {/* Connector Line - extends through expanded guidance, positioned relative to entire item */}
+      {showConnector && !isLast && (
+        <div 
+          className={`absolute top-10 left-5 w-0.5 ${
+            status === 'DONE' ? 'bg-primary' : 'bg-border'
+          }`}
+          style={{ 
+            bottom: 0,
+            minHeight: '60px'
+          }}
+          aria-hidden="true" 
+        />
+      )}
+      
+      {/* Step Number Badge */}
+      <div className="flex flex-col items-center flex-shrink-0 relative z-10">
         {stepNumber !== undefined && (
           <div 
-            className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full relative z-10 ${
+            className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full ${
               status === 'DONE' 
                 ? 'bg-success text-white' 
                 : 'bg-muted text-muted-foreground'
@@ -128,15 +143,6 @@ export function ChecklistItem({
               <span className="text-body-100-medium font-medium">{stepNumber}</span>
             )}
           </div>
-        )}
-        {/* Connector Line */}
-        {showConnector && !isLast && (
-          <div 
-            className={`w-0.5 flex-1 min-h-[60px] mt-2 ${
-              status === 'DONE' ? 'bg-primary' : 'bg-border'
-            }`} 
-            aria-hidden="true" 
-          />
         )}
       </div>
     
@@ -252,9 +258,8 @@ export function ChecklistItem({
               </span>
             </div>
             
-            <p className="text-body-100 text-foreground">
-              Guidance content will be displayed here. This is a placeholder for future implementation.
-            </p>
+            {/* Render specific guidance content based on action/product */}
+            {renderGuidanceContent({ action })}
           </div>
         )}
       </div>
