@@ -1,7 +1,7 @@
-// Figma image assets
-const homeIcon = "https://www.figma.com/api/mcp/asset/92a07ea9-fc71-44e3-83e2-99bc4826b21e";
-const technologyIcon = "https://www.figma.com/api/mcp/asset/5d0eb1f1-2658-460b-912b-82451d398f08";
-const wellpassIcon = "https://www.figma.com/api/mcp/asset/30910f22-78e0-4d29-ae3c-1a8ec8913529";
+// Figma image assets from: https://www.figma.com/design/B5H5AxzPnbGZc665ME1tAO/OX-UI-Kit2025?node-id=269-42612&m=dev
+const homeIcon = "https://www.figma.com/api/mcp/asset/75b4d14d-bc11-49ba-b168-9759ce1d8e0e";
+const technologyIcon = "https://www.figma.com/api/mcp/asset/8939fe61-d14f-4d68-bf8b-7bf84e7605fd";
+const wellpassIcon = "https://www.figma.com/api/mcp/asset/00a7d1ee-ee39-4675-a42d-38c9a38aa3e6";
 
 interface NavItemProps {
   icon: string;

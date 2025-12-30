@@ -1,18 +1,19 @@
 import { Route } from 'lucide-react';
 
-// Figma image assets
-const settingsIcon = "https://www.figma.com/api/mcp/asset/4e041138-296c-45df-b5f9-8cea64692b94";
-const inboxIcon = "https://www.figma.com/api/mcp/asset/3f64054c-8f75-4da4-9efd-e04d0faf91a0";
-const analyticsIcon = "https://www.figma.com/api/mcp/asset/a2392eda-3d35-404b-a616-a4e0d9d82a89";
-const fitnessHubIcon = "https://www.figma.com/api/mcp/asset/b4ef17ec-c6e4-493b-8f2a-f950e6c214b2";
-const smartStrengthIcon = "https://www.figma.com/api/mcp/asset/cda7135a-2391-462b-846c-26e6864c928c";
-const smartFlexIcon = "https://www.figma.com/api/mcp/asset/e4671a5c-c20b-4e3c-ba97-027d5e1e2ac2";
-const smartCardioIcon = "https://www.figma.com/api/mcp/asset/10e1c663-aa81-4b85-9bd3-e28834f5c1c2";
-const memberAppIcon = "https://www.figma.com/api/mcp/asset/476a42b8-aab1-4790-a540-1680249e641e";
-const trainerAppIcon = "https://www.figma.com/api/mcp/asset/15a9e6a1-abf0-43e2-a243-da9bb0a407de";
-const supportIcon = "https://www.figma.com/api/mcp/asset/60cc173d-ffaa-42b2-962b-da7cd015849e";
-const educationIcon = "https://www.figma.com/api/mcp/asset/316f1fd9-db34-49e5-a6ec-b619743932f0";
-const marketingIcon = "https://www.figma.com/api/mcp/asset/0f43ccf1-de67-4d30-b401-490178451449";
+// Figma image assets from: https://www.figma.com/design/B5H5AxzPnbGZc665ME1tAO/OX-UI-Kit2025?node-id=269-42612&m=dev
+// Mapping: Members & Staff -> EGYM settings, Gym Inventory -> Gym inventory, Analytics -> Analytics
+const settingsIcon = "https://www.figma.com/api/mcp/asset/1d488141-24fb-40fa-a602-452b75be0795";
+const inboxIcon = "https://www.figma.com/api/mcp/asset/b49d7e0e-2f19-4663-a09a-785ec5bc93b2";
+const analyticsIcon = "https://www.figma.com/api/mcp/asset/b043534b-517b-44ea-ad9d-75b8ab58043b";
+const fitnessHubIcon = "https://www.figma.com/api/mcp/asset/8b32116c-5c7c-428a-8f37-ad0607e47071";
+const smartStrengthIcon = "https://www.figma.com/api/mcp/asset/b30bbca4-40bd-4fe7-ae6c-9115b2d35faa";
+const smartFlexIcon = "https://www.figma.com/api/mcp/asset/7c359ecf-fa61-47fb-aa3f-fa823aad80ad";
+const smartCardioIcon = "https://www.figma.com/api/mcp/asset/59a978e8-39ca-453e-b992-e1a7ae21fd2a";
+const memberAppIcon = "https://www.figma.com/api/mcp/asset/054e352f-5934-4a77-a72d-1f98bcbcc99f";
+const trainerAppIcon = "https://www.figma.com/api/mcp/asset/73db1358-4bae-40fc-8677-341de437fc0c";
+const supportIcon = "https://www.figma.com/api/mcp/asset/48be70f9-6a38-4d5b-95bc-8e255936b107";
+const educationIcon = "https://www.figma.com/api/mcp/asset/5423afde-a5d3-4a37-a488-7376f5a95837";
+const marketingIcon = "https://www.figma.com/api/mcp/asset/c8009177-b6aa-421f-a6e1-ddb2325bc1de";
 
 interface SidebarTabProps {
   icon: string | React.ReactNode;

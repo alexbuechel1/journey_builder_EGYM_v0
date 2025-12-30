@@ -3,11 +3,11 @@ import { Button } from '@/components/ui/button';
 import { useJourney } from '@/contexts/JourneyContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-// Figma image assets
-const egymLogo = "https://www.figma.com/api/mcp/asset/78c42b99-f78f-4dc1-9ad9-93048bd98710";
-const gymImage = "https://www.figma.com/api/mcp/asset/bb2912ff-5561-4346-b69b-3f72866d3d8c";
-const chevronDown = "https://www.figma.com/api/mcp/asset/9b208332-cae9-4fe8-a55b-6405ed8e8814";
-const userAvatar = "https://www.figma.com/api/mcp/asset/a6fdd0aa-c530-4c96-bcd9-ed97f5730cfa";
+// Figma image assets from: https://www.figma.com/design/B5H5AxzPnbGZc665ME1tAO/OX-UI-Kit2025?node-id=269-42612&m=dev
+const egymLogo = "https://www.figma.com/api/mcp/asset/92821905-20f1-4507-a272-8cc0a91bf93f";
+const gymImage = "https://www.figma.com/api/mcp/asset/01ff7d73-c0c5-4042-918b-7300c8c3c595";
+const chevronDown = "https://www.figma.com/api/mcp/asset/79aa0c4a-2a00-432a-a05b-ce7f16b4f29b";
+const userAvatar = "https://www.figma.com/api/mcp/asset/01ff7d73-c0c5-4042-918b-7300c8c3c595";
 
 interface HeaderProps {
   isSimulatorOpen?: boolean;
