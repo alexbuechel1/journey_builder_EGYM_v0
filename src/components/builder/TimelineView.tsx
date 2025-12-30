@@ -98,27 +98,31 @@ export function TimelineView({ actions, onActionClick }: TimelineViewProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Timeline items grouped by time buckets */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col relative">
+        {/* Continuous vertical line connecting all timeframe dots - centered on dots */}
+        {buckets.length > 1 && (
+          <div 
+            className="absolute w-0.5 bg-primary/60"
+            style={{
+              left: '7px', // Center of w-4 container (8px) minus half line width (0.5px for w-0.5)
+              top: '5px', // Start from first dot center (accounting for dot size)
+              bottom: actionsWithoutDeadlines.length > 0 ? '4rem' : '0',
+            }}
+          />
+        )}
+        
         {buckets.map((bucket, bucketIndex) => {
           const isLast = bucketIndex === buckets.length - 1 && actionsWithoutDeadlines.length === 0;
           
           return (
-            <div key={`bucket-${bucket.days}`} className="flex items-start gap-2">
-              {/* Timeline line and dot */}
-              <div className="flex flex-col items-center pt-1">
-                {/* Timeline dot */}
-                <div className={`
-                  w-2 h-2 rounded-full border-2 border-white shadow-sm
-                  ${bucket.days === 0 ? 'bg-green-500' : 'bg-primary/60'}
-                `}></div>
-                {/* Vertical line */}
-                {!isLast && (
-                  <div className="w-0.5 h-full min-h-[1rem] bg-primary/20 mt-1"></div>
-                )}
+            <div key={`bucket-${bucket.days}`} className="flex items-start gap-2 relative z-10">
+              {/* Timeline dot - all orange, centered */}
+              <div className="flex-shrink-0 w-4 flex items-center justify-center">
+                <div className="w-2.5 h-2.5 rounded-full border-2 border-white shadow-md bg-primary"></div>
               </div>
               
               {/* Time bucket content */}
-              <div className="flex-1 min-w-0 pb-2">
+              <div className="flex-1 min-w-0 pb-4">
                 {/* Time label */}
                 <div className="text-xs font-medium text-muted-foreground mb-2">
                   {bucket.label}
@@ -134,13 +138,10 @@ export function TimelineView({ actions, onActionClick }: TimelineViewProps) {
                       <div key={`action-${actionItem.actionId}`} className="flex items-start gap-2 group">
                         {/* Sub-timeline line for actions in same bucket */}
                         <div className="flex flex-col items-center pt-1.5">
-                          <div className={`
-                            w-1.5 h-1.5 rounded-full border border-white shadow-sm
-                            ${actionItem.isEntryAction ? 'bg-green-500' : 'bg-primary/60'}
-                            transition-transform group-hover:scale-125
-                          `}></div>
+                          {/* All action dots orange */}
+                          <div className="w-1.5 h-1.5 rounded-full border border-white shadow-sm bg-primary transition-transform group-hover:scale-125"></div>
                           {!isLastOverall && (
-                            <div className="w-0.5 h-full min-h-[1.5rem] bg-primary/10 mt-1"></div>
+                            <div className="w-0.5 h-full min-h-[1.5rem] bg-primary/20 mt-1"></div>
                           )}
                         </div>
                         
@@ -166,7 +167,7 @@ export function TimelineView({ actions, onActionClick }: TimelineViewProps) {
         {actionsWithoutDeadlines.length > 0 && (
           <div className="flex items-start gap-2 group mt-2 pt-2 border-t border-border">
             <div className="flex flex-col items-center pt-1">
-              <div className="w-2 h-2 rounded-full bg-gray-400 border-2 border-white shadow-sm"></div>
+              <div className="w-2 h-2 rounded-full bg-primary border-2 border-white shadow-sm"></div>
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs font-medium text-muted-foreground mb-2">

@@ -247,16 +247,14 @@ export function JourneyBuilder() {
             </div>
           </div>
         ) : (
-          /* Scrollable container - not scaled */
-          <div className="overflow-y-auto max-h-[calc(100vh-300px)]">
-            {/* Content wrapper with zoom - entire journey scales uniformly */}
-            <div 
-              className="flex gap-6 transition-transform duration-200"
-              style={{ 
-                transform: `scale(${zoomLevel})`,
-                transformOrigin: 'top left',
-              }}
-            >
+          /* Content wrapper with zoom - entire journey scales uniformly */
+          <div 
+            className="flex gap-6 transition-transform duration-200"
+            style={{ 
+              transform: `scale(${zoomLevel})`,
+              transformOrigin: 'top left',
+            }}
+          >
               {/* Vertical Timeline - Left side */}
               {showTimeline && (
                 <div className="w-56 flex-shrink-0">
@@ -304,7 +302,6 @@ export function JourneyBuilder() {
                 </div>
               </div>
             </div>
-          </div>
         )}
       </div>
 
