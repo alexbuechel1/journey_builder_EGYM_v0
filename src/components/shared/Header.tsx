@@ -6,7 +6,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 // Figma image assets from: https://www.figma.com/design/B5H5AxzPnbGZc665ME1tAO/OX-UI-Kit2025?node-id=269-42612&m=dev
 const egymLogo = "https://www.figma.com/api/mcp/asset/92821905-20f1-4507-a272-8cc0a91bf93f";
 const gymImage = "https://www.figma.com/api/mcp/asset/01ff7d73-c0c5-4042-918b-7300c8c3c595";
-const chevronDown = "https://www.figma.com/api/mcp/asset/79aa0c4a-2a00-432a-a05b-ce7f16b4f29b";
 const userAvatar = "https://www.figma.com/api/mcp/asset/01ff7d73-c0c5-4042-918b-7300c8c3c595";
 
 interface HeaderProps {
@@ -43,9 +42,6 @@ export function Header({}: HeaderProps = {}) {
         <p className="text-body-100 text-foreground whitespace-nowrap">
           Holmes Place Boutique - Berlin Friedrichshain
         </p>
-        <div className="flex items-center justify-center size-6 rounded-full shrink-0">
-          <img src={chevronDown} alt="Dropdown" className="size-5" />
-        </div>
       </button>
 
       {/* Right Side Controls */}
