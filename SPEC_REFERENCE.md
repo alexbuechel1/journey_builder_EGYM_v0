@@ -252,9 +252,9 @@ UI renders it as a list, but data model supports splits and reconverges later.
 
 ### A02 — Check-In done
 - eventType: `CHECKIN_DONE`
-- completionMode: `OCCURRENCE`
-- supportedProducts: `[UNKNOWN]`
-- supportsGuidance: false
+- completionMode: `COUNTER`
+- supportedProducts: `[UNKNOWN, BMA]`
+- supportsGuidance: true
 - defaultGuidanceEnabled: false
 
 ### A03 — Strength test done

@@ -18,11 +18,11 @@ export const ACTION_LIBRARY: Record<string, ActionLibraryItem> = {
   A02: {
     id: 'A02',
     title: 'Check-In done',
-    description: 'Complete your first check-in at the gym',
+    description: 'Complete your check-ins at the gym',
     eventType: 'CHECKIN_DONE',
-    completionMode: 'OCCURRENCE',
-    supportedProducts: ['UNKNOWN'],
-    supportsGuidance: false,
+    completionMode: 'COUNTER',
+    supportedProducts: ['UNKNOWN', 'BMA'],
+    supportsGuidance: true,
     defaultGuidanceEnabled: false,
   },
   A03: {
