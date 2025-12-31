@@ -33,6 +33,19 @@ export function SimulatorProvider({ children }: { children: React.ReactNode }) {
   
   // Track last reminder trigger times (reminderId -> last trigger time)
   const lastReminderTimesRef = useRef<Map<string, Date>>(new Map());
+  
+  // Refs to track latest state for event processing
+  const actionInstancesRef = useRef<ActionInstance[]>([]);
+  const entryActionCompletedAtRef = useRef<Date | undefined>(undefined);
+  
+  // Keep refs in sync with state
+  useEffect(() => {
+    actionInstancesRef.current = actionInstances;
+  }, [actionInstances]);
+  
+  useEffect(() => {
+    entryActionCompletedAtRef.current = entryActionCompletedAt;
+  }, [entryActionCompletedAt]);
 
   // Initialize action instances when journey changes
   useEffect(() => {
@@ -167,12 +180,25 @@ export function SimulatorProvider({ children }: { children: React.ReactNode }) {
       occurredAt: simulatedTime,
     };
 
-    // Process the event
+    // Get latest state from refs
+    const currentActionInstances = actionInstancesRef.current;
+    let currentEntryCompletedAt = entryActionCompletedAtRef.current;
+
+    // Check if this is the entry action and journey hasn't started
+    if (!currentEntryCompletedAt && currentJourney.actions.length > 0) {
+      const entryAction = currentJourney.actions[0];
+      if (entryAction.eventType === eventType && entryAction.product === product) {
+        currentEntryCompletedAt = simulatedTime;
+        setEntryActionCompletedAtState(simulatedTime);
+      }
+    }
+
+    // Process the event with latest state
     const { updatedActions, newNotifications } = processEvent(
       event,
       currentJourney,
-      actionInstances,
-      entryActionCompletedAt,
+      currentActionInstances,
+      currentEntryCompletedAt,
       simulatedTime,
       lastReminderTimesRef.current
     );
@@ -200,15 +226,7 @@ export function SimulatorProvider({ children }: { children: React.ReactNode }) {
 
     // Add event to events list
     setEvents((prev) => [event, ...prev]);
-
-    // If this is the entry action and journey hasn't started, set entry completion time
-    if (!entryActionCompletedAt && currentJourney.actions.length > 0) {
-      const entryAction = currentJourney.actions[0];
-      if (entryAction.eventType === eventType && entryAction.product === product) {
-        setEntryActionCompletedAtState(simulatedTime);
-      }
-    }
-  }, [currentJourney, actionInstances, entryActionCompletedAt, simulatedTime]);
+  }, [currentJourney, simulatedTime]);
 
   const setEntryActionCompletedAt = useCallback((date: Date | undefined) => {
     setEntryActionCompletedAtState(date);
