@@ -1,7 +1,9 @@
-// Figma image assets from: https://www.figma.com/design/B5H5AxzPnbGZc665ME1tAO/OX-UI-Kit2025?node-id=269-42612&m=dev
-const homeIcon = "https://www.figma.com/api/mcp/asset/75b4d14d-bc11-49ba-b168-9759ce1d8e0e";
-const technologyIcon = "https://www.figma.com/api/mcp/asset/8939fe61-d14f-4d68-bf8b-7bf84e7605fd";
-const wellpassIcon = "https://www.figma.com/api/mcp/asset/00a7d1ee-ee39-4675-a42d-38c9a38aa3e6";
+// Local assets stored in public/icons/ to avoid Figma URL expiry
+// To update assets, run: npm run download-assets
+// Note: Assets are SVGs but may be saved with different extensions
+const homeIcon = "/icons/home.svg";
+const technologyIcon = "/icons/technology.svg";
+const wellpassIcon = "/icons/wellpass.svg";
 
 interface NavItemProps {
   icon: string;

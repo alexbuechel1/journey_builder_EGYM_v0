@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button';
 import { useJourney } from '@/contexts/JourneyContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-// Figma image assets from: https://www.figma.com/design/B5H5AxzPnbGZc665ME1tAO/OX-UI-Kit2025?node-id=269-42612&m=dev
-const egymLogo = "https://www.figma.com/api/mcp/asset/92821905-20f1-4507-a272-8cc0a91bf93f";
-const gymImage = "https://www.figma.com/api/mcp/asset/01ff7d73-c0c5-4042-918b-7300c8c3c595";
-const userAvatar = "https://www.figma.com/api/mcp/asset/01ff7d73-c0c5-4042-918b-7300c8c3c595";
+// Local assets stored in public/icons/ to avoid Figma URL expiry
+// To update assets, run: npm run download-assets
+// Note: Assets are SVGs but may be saved with different extensions
+const egymLogo = "/icons/egym-logo.svg";
+const gymImage = "/icons/gym-avatar.svg";
+const userAvatar = "/icons/user-avatar.svg";
 
 interface HeaderProps {
   isSimulatorOpen?: boolean;

@@ -1,19 +1,20 @@
 import { Route } from 'lucide-react';
 
-// Figma image assets from: https://www.figma.com/design/B5H5AxzPnbGZc665ME1tAO/OX-UI-Kit2025?node-id=269-42612&m=dev
-// Mapping: Members & Staff -> EGYM settings, Gym Inventory -> Gym inventory, Analytics -> Analytics
-const settingsIcon = "https://www.figma.com/api/mcp/asset/1d488141-24fb-40fa-a602-452b75be0795";
-const inboxIcon = "https://www.figma.com/api/mcp/asset/b49d7e0e-2f19-4663-a09a-785ec5bc93b2";
-const analyticsIcon = "https://www.figma.com/api/mcp/asset/b043534b-517b-44ea-ad9d-75b8ab58043b";
-const fitnessHubIcon = "https://www.figma.com/api/mcp/asset/8b32116c-5c7c-428a-8f37-ad0607e47071";
-const smartStrengthIcon = "https://www.figma.com/api/mcp/asset/b30bbca4-40bd-4fe7-ae6c-9115b2d35faa";
-const smartFlexIcon = "https://www.figma.com/api/mcp/asset/7c359ecf-fa61-47fb-aa3f-fa823aad80ad";
-const smartCardioIcon = "https://www.figma.com/api/mcp/asset/59a978e8-39ca-453e-b992-e1a7ae21fd2a";
-const memberAppIcon = "https://www.figma.com/api/mcp/asset/054e352f-5934-4a77-a72d-1f98bcbcc99f";
-const trainerAppIcon = "https://www.figma.com/api/mcp/asset/73db1358-4bae-40fc-8677-341de437fc0c";
-const supportIcon = "https://www.figma.com/api/mcp/asset/48be70f9-6a38-4d5b-95bc-8e255936b107";
-const educationIcon = "https://www.figma.com/api/mcp/asset/5423afde-a5d3-4a37-a488-7376f5a95837";
-const marketingIcon = "https://www.figma.com/api/mcp/asset/c8009177-b6aa-421f-a6e1-ddb2325bc1de";
+// Local assets stored in public/icons/ to avoid Figma URL expiry
+// To update assets, run: npm run download-assets
+// Note: Assets are SVGs but may be saved with different extensions
+const settingsIcon = "/icons/settings.svg";
+const inboxIcon = "/icons/inbox.svg";
+const analyticsIcon = "/icons/analytics.svg";
+const fitnessHubIcon = "/icons/fitness-hub.svg";
+const smartStrengthIcon = "/icons/smart-strength.svg";
+const smartFlexIcon = "/icons/smart-flex.svg";
+const smartCardioIcon = "/icons/smart-cardio.svg";
+const memberAppIcon = "/icons/member-app.svg";
+const trainerAppIcon = "/icons/trainer-app.svg";
+const supportIcon = "/icons/support.svg";
+const educationIcon = "/icons/education.svg";
+const marketingIcon = "/icons/marketing.svg";
 
 interface SidebarTabProps {
   icon: string | React.ReactNode;
